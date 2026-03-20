@@ -1,0 +1,14 @@
+# Mac system files
+.DS_Store
+.DS_Store?
+
+# Backup files
+*.wpress
+*.zip
+orderfireworksonline-com-*
+
+# Word docs (store these elsewhere)
+*.docx
+
+# Node
+node_modules/
