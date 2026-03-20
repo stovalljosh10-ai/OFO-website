@@ -8,3 +8,89 @@
  Version:      1.1
  Text Domain:  bricks
 */
+
+/* ============================================================
+   PHASE 2: Hero Banner Styles
+   ============================================================ */
+.hero-headline {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  text-shadow: 2px 4px 12px rgba(0,0,0,0.4);
+}
+
+.hero-subhead {
+  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-weight: 500;
+  opacity: 0.92;
+  margin-top: 0.5rem;
+}
+
+.hero-cta-primary {
+  background: #FF4500;
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 16px 36px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 20px rgba(255,69,0,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: inline-block;
+  text-decoration: none;
+  margin-right: 12px;
+  margin-top: 20px;
+}
+
+.hero-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(255,69,0,0.65);
+  color: #ffffff;
+}
+
+.hero-cta-secondary {
+  background: transparent;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 14px 32px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 2px solid rgba(255,255,255,0.8);
+  transition: transform 0.2s, background 0.2s;
+  display: inline-block;
+  text-decoration: none;
+  margin-top: 20px;
+}
+
+.hero-cta-secondary:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.15);
+  color: #ffffff;
+}
+
+/* ============================================================
+   PHASE 4: Per-unit price display
+   ============================================================ */
+.ofo-per-unit-price {
+  display: block;
+  font-size: 0.78em;
+  color: var(--color-text-muted, #888);
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.ofo-competitor-callout {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  font-size: 0.72em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 4px;
+  font-weight: 500;
+}

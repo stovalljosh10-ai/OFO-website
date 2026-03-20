@@ -258,39 +258,134 @@ add_action('wp_footer', function() {
 // All slider content is managed here for easy editing
 function get_homepage_slider_data() {
     return array(
-        // Slide 1
-        array(
-            'desktop_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero.jpg',
-            'mobile_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero-Mobile.jpg',
-            'small_text' => '10% OFF SITEWIDE + WIN A $500 OFO CREDIT ',
-            'heading' => 'GOING FOR GOLD SALE<br>NOW LIVE!',
-            'description' => '', // Optional - leave empty if not needed
-            'button_text' => 'SHOP DEALS',
-            'button_url' => '/product-category/pallet-packs/',
-        ),
-        // Slide 2
+        // Slide 1 — Main hero
         array(
             'desktop_image' => '/wp-content/uploads/2026/02/2OFO-Hero-Background.jpg',
             'mobile_image' => '/wp-content/uploads/2026/02/1OFO-Hero-Background-Mobile.jpg',
-            'small_text' => '', // Optional - leave empty if not needed
-            'heading' => 'Light Up Your Celebrations',
-            'description' => 'Premium quality fireworks for unforgettable moments',
-            'button_text' => 'Shop Now',
-            'button_url' => '/product-category/ground-fireworks/',
+            'small_text' => 'WHOLESALE CASE PRICING — NO MINIMUM ORDER',
+            'heading' => "AMERICA'S BEST PRICE<br>ON FIREWORKS",
+            'description' => 'Up to 87% Cheaper Per Unit Than Local Stores',
+            'button_text' => 'SHOP 500G CAKES',
+            'button_url' => '/product-category/aerial-fireworks/500g-cakes/',
+            'button2_text' => 'BUILD YOUR PALLET',
+            'button2_url' => '/product-category/pallet-packs/',
         ),
-        // Add more slides below by copying the array structure above
-        // Example Slide 3 (uncomment to use):
-        
-//         array(
-//             'desktop_image' => '/wp-content/uploads/2025/11/Home_Fireworks_Banner_2.png',
-//             'mobile_image' => '/wp-content/uploads/2025/11/your-mobile-image.png',
-//             'small_text' => 'Your Small Text Here',
-//             'heading' => 'Your Main Heading',
-//             'description' => 'Your description text here',
-//             'button_text' => 'Button Text',
-//             'button_url' => '/your-link-here/',
-//         ),
-       
+        // Slide 2 — Sale banner
+        array(
+            'desktop_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero.jpg',
+            'mobile_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero-Mobile.jpg',
+            'small_text' => '10% OFF SITEWIDE + WIN A $500 OFO CREDIT',
+            'heading' => 'GOING FOR GOLD<br>SALE NOW LIVE!',
+            'description' => 'Limited time — claim your discount before it ends',
+            'button_text' => 'CLAIM YOUR DISCOUNT',
+            'button_url' => '/product-category/pallet-packs/',
+        ),
     );
 }
 
+// ============================================================
+// PHASE 3: WooCommerce Product Schema for Google Rich Results
+// ============================================================
+add_action('wp_head', 'ofo_add_product_schema');
+function ofo_add_product_schema() {
+    if (!is_product()) return;
+    global $product;
+    if (!$product) return;
+    
+    $schema = array(
+        '@context' => 'https://schema.org',
+        '@type' => 'Product',
+        'name' => get_the_title(),
+        'description' => wp_strip_all_tags($product->get_description()),
+        'image' => wp_get_attachment_url($product->get_image_id()),
+        'offers' => array(
+            '@type' => 'Offer',
+            'price' => $product->get_price(),
+            'priceCurrency' => 'USD',
+            'availability' => $product->is_in_stock() 
+                ? 'https://schema.org/InStock' 
+                : 'https://schema.org/OutOfStock',
+            'url' => get_permalink(),
+        ),
+    );
+    
+    $avg_rating = $product->get_average_rating();
+    $review_count = $product->get_review_count();
+    if ($avg_rating && $review_count) {
+        $schema['aggregateRating'] = array(
+            '@type' => 'AggregateRating',
+            'ratingValue' => $avg_rating,
+            'reviewCount' => $review_count,
+        );
+    }
+    
+    echo '<script type="application/ld+json">' . json_encode($schema) . '</script>';
+}
+
+// ============================================================
+// PHASE 4: Per-unit price display on product pages
+// ============================================================
+add_filter('woocommerce_get_price_html', 'ofo_add_per_unit_price', 10, 2);
+function ofo_add_per_unit_price($price_html, $product) {
+    if (is_admin()) return $price_html;
+    
+    $case_pack = $product->get_attribute('case_pack');
+    if (!$case_pack) $case_pack = get_post_meta($product->get_id(), '_case_pack', true);
+    if (!$case_pack || !is_numeric($case_pack) || $case_pack <= 1) return $price_html;
+    
+    $unit_price = $product->get_price() / intval($case_pack);
+    $formatted = wc_price($unit_price);
+    
+    $callout = '<span class="ofo-per-unit-price">≈ ' . $formatted . ' per unit (case of ' . intval($case_pack) . ')</span>';
+    
+    return $price_html . $callout;
+}
+
+// ============================================================
+// PHASE 5: Cart savings display
+// ============================================================
+add_action('woocommerce_cart_totals_before_order_total', 'ofo_cart_savings_display');
+function ofo_cart_savings_display() {
+    $savings = 0;
+    foreach (WC()->cart->get_cart() as $cart_item) {
+        $product = $cart_item['data'];
+        $qty = $cart_item['quantity'];
+        $regular = $product->get_regular_price();
+        $sale = $product->get_price();
+        if ($regular && $sale && $regular > $sale) {
+            $savings += ($regular - $sale) * $qty;
+        }
+    }
+    if ($savings > 0) {
+        echo '<tr class="ofo-cart-savings">
+            <th>🎉 You\'re saving</th>
+            <td><strong style="color:#28a745;font-size:1.1em;">' . wc_price($savings) . '</strong></td>
+        </tr>';
+    }
+}
+
+// ============================================================
+// PHASE 6: Custom Pallet Builder shortcode
+// ============================================================
+add_shortcode('ofo_pallet_builder', 'ofo_render_pallet_builder');
+function ofo_render_pallet_builder($atts) {
+    ob_start();
+    $args = array(
+        'post_type' => 'product',
+        'posts_per_page' => 24,
+        'post_status' => 'publish',
+        'tax_query' => array(array(
+            'taxonomy' => 'product_cat',
+            'field' => 'slug',
+            'terms' => array('500g-cakes', '200g-cakes', 'artillery'),
+        )),
+    );
+    $products = new WP_Query($args);
+    $template = get_stylesheet_directory() . '/templates/pallet-builder.php';
+    if (file_exists($template)) {
+        include $template;
+    } else {
+        echo '<p>Pallet builder template not found.</p>';
+    }
+    return ob_get_clean();
+}
