@@ -947,7 +947,7 @@ function custom_shortcode_header()
             align-items: center;
             justify-content: center;
             opacity: 0;
-            animation: bannerFade 8s infinite;
+            animation: bannerFade 12s infinite;
         }
 
         .ep-banner-slide:nth-child(1) {
@@ -956,6 +956,10 @@ function custom_shortcode_header()
 
         .ep-banner-slide:nth-child(2) {
             animation-delay: 4s;
+        }
+
+        .ep-banner-slide:nth-child(3) {
+            animation-delay: 8s;
         }
 
         @keyframes bannerFade {
@@ -988,8 +992,7 @@ function custom_shortcode_header()
             align-items: center;
             justify-content: center;
             opacity: 0;
-            animation: bannerFade 6s infinite;
-            /* Changed from 8s to 6s */
+            animation: bannerFade 12s infinite;
         }
 
         .ep-banner-slide:nth-child(1) {
@@ -997,8 +1000,11 @@ function custom_shortcode_header()
         }
 
         .ep-banner-slide:nth-child(2) {
-            animation-delay: 3.7s;
-            /* Changed from 4s to 3s */
+            animation-delay: 4s;
+        }
+
+        .ep-banner-slide:nth-child(3) {
+            animation-delay: 8s;
         }
     </style>
 
@@ -1009,10 +1015,13 @@ function custom_shortcode_header()
         <div class="ep-banner-slider">
             <div class="ep-banner-track">
                 <div class="ep-banner-slide">
-                    $99 Shipping On All Orders Over $1500
+                    🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500
                 </div>
                 <div class="ep-banner-slide">
-                    Free Shipping on All Orders above $2000
+                    💥 Up to 87% Cheaper Per Unit Than Buying Retail
+                </div>
+                <div class="ep-banner-slide">
+                    🏆 Wholesale Pricing on 500g Cakes, Artillery &amp; Pallet Packs
                 </div>
             </div>
         </div>
