@@ -1,0 +1,27 @@
+/* Per unit price */
+.ofo-per-unit-price {
+    display: block;
+    font-size: 0.78em;
+    color: #6c757d;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+/* Cart savings row */
+.ofo-cart-savings th,
+.ofo-cart-savings td {
+    padding: 8px 0;
+    color: #1a8a3c;
+}
+
+/* Category page SEO description */
+.ofo-category-description {
+    background: #f0f2f5;
+    border-left: 4px solid #003087;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #343a40;
+    border-radius: 0 8px 8px 0;
+}

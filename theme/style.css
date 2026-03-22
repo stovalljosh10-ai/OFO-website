@@ -94,3 +94,37 @@
   margin-top: 4px;
   font-weight: 500;
 }
+
+
+/* ============================================================
+   NEW FEATURES CSS
+   ============================================================ */
+.ofo-price-match-badge { display:flex; align-items:center; gap:8px; background:#eaf5ec; border:1px solid #28a745; border-radius:6px; padding:10px 14px; font-size:0.85em; color:#1a6b2a; margin:12px 0; }
+.ofo-pm-icon { font-size:1.2em; color:#28a745; }
+.ofo-new-badge { position:absolute; top:10px; left:10px; background:#0066cc; color:#fff; font-size:0.7em; font-weight:700; padding:3px 8px; border-radius:4px; letter-spacing:1px; z-index:10; }
+.ofo-faq-container { max-width:800px; margin:0 auto; }
+.ofo-faq-item { border-bottom:1px solid #eee; }
+.ofo-faq-question { width:100%; background:none; border:none; padding:16px 0; display:flex; justify-content:space-between; align-items:center; font-size:1em; font-weight:600; color:#111; cursor:pointer; text-align:left; }
+.ofo-faq-question:hover { color:#e60000; }
+.ofo-faq-arrow { font-size:1.4em; color:#e60000; font-weight:400; }
+.ofo-faq-answer { display:none; padding:0 0 16px; color:#555; line-height:1.7; }
+.ofo-price-comparison { background:#f8f8f8; border-radius:8px; padding:14px 16px; margin:12px 0; font-size:0.9em; }
+.ofo-pc-title { font-weight:700; font-size:0.85em; color:#555; margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px; }
+.ofo-pc-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid #eee; }
+.ofo-pc-us { font-weight:700; color:#e60000; }
+.ofo-pc-us-price { font-weight:700; color:#e60000; }
+.ofo-pc-retail { color:#999; text-decoration:line-through; }
+.ofo-pc-savings { margin-top:8px; color:#28a745; font-weight:700; }
+.ofo-new-arrivals-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:16px; }
+.ofo-na-card { background:#fff; border:1px solid #eee; border-radius:8px; overflow:hidden; position:relative; }
+.ofo-na-card img { width:100%; height:140px; object-fit:cover; }
+.ofo-na-body { padding:10px; }
+.ofo-na-body h4 { font-size:0.9em; margin:0 0 4px; }
+.ofo-na-body h4 a { color:#111; text-decoration:none; }
+.ofo-na-price { color:#e60000; font-weight:700; font-size:0.9em; }
+.ofo-help-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin:24px 0; }
+.ofo-help-card { background:#fff; border:1px solid #eee; border-radius:10px; padding:20px; text-decoration:none; color:inherit; transition:border-color 0.2s; display:block; }
+.ofo-help-card:hover { border-color:#e60000; }
+.ofo-help-icon { font-size:16px; margin-bottom:8px; }
+.ofo-help-card h3 { font-size:0.95em; font-weight:700; margin:0 0 4px; color:#111; }
+.ofo-help-card p { font-size:0.82em; color:#666; margin:0; line-height:1.5; }

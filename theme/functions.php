@@ -284,14 +284,13 @@ function get_homepage_slider_data() {
 }
 
 // ============================================================
-// PHASE 3: WooCommerce Product Schema for Google Rich Results
+// Product Schema for Google Rich Results
 // ============================================================
 add_action('wp_head', 'ofo_add_product_schema');
 function ofo_add_product_schema() {
     if (!is_product()) return;
     global $product;
     if (!$product) return;
-    
     $schema = array(
         '@context' => 'https://schema.org',
         '@type' => 'Product',
@@ -302,13 +301,10 @@ function ofo_add_product_schema() {
             '@type' => 'Offer',
             'price' => $product->get_price(),
             'priceCurrency' => 'USD',
-            'availability' => $product->is_in_stock() 
-                ? 'https://schema.org/InStock' 
-                : 'https://schema.org/OutOfStock',
+            'availability' => $product->is_in_stock() ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
             'url' => get_permalink(),
         ),
     );
-    
     $avg_rating = $product->get_average_rating();
     $review_count = $product->get_review_count();
     if ($avg_rating && $review_count) {
@@ -318,32 +314,23 @@ function ofo_add_product_schema() {
             'reviewCount' => $review_count,
         );
     }
-    
     echo '<script type="application/ld+json">' . json_encode($schema) . '</script>';
 }
 
-// ============================================================
-// PHASE 4: Per-unit price display on product pages
-// ============================================================
+// Per-unit price display below WooCommerce price
 add_filter('woocommerce_get_price_html', 'ofo_add_per_unit_price', 10, 2);
 function ofo_add_per_unit_price($price_html, $product) {
     if (is_admin()) return $price_html;
-    
     $case_pack = $product->get_attribute('case_pack');
     if (!$case_pack) $case_pack = get_post_meta($product->get_id(), '_case_pack', true);
     if (!$case_pack || !is_numeric($case_pack) || $case_pack <= 1) return $price_html;
-    
     $unit_price = $product->get_price() / intval($case_pack);
     $formatted = wc_price($unit_price);
-    
     $callout = '<span class="ofo-per-unit-price">≈ ' . $formatted . ' per unit (case of ' . intval($case_pack) . ')</span>';
-    
     return $price_html . $callout;
 }
 
-// ============================================================
-// PHASE 5: Cart savings display
-// ============================================================
+// Cart savings display
 add_action('woocommerce_cart_totals_before_order_total', 'ofo_cart_savings_display');
 function ofo_cart_savings_display() {
     $savings = 0;
@@ -359,33 +346,448 @@ function ofo_cart_savings_display() {
     if ($savings > 0) {
         echo '<tr class="ofo-cart-savings">
             <th>🎉 You\'re saving</th>
-            <td><strong style="color:#28a745;font-size:1.1em;">' . wc_price($savings) . '</strong></td>
+            <td><strong style="color:#1a8a3c;font-size:1.1em;">' . wc_price($savings) . '</strong></td>
         </tr>';
     }
 }
 
+// SEO meta title format for products
+add_filter('wpseo_title', 'ofo_product_seo_title');
+add_filter('rank_math/frontend/title', 'ofo_product_seo_title');
+function ofo_product_seo_title($title) {
+    if (!is_product()) return $title;
+    global $product;
+    if (!$product) return $title;
+    $shot_count = get_post_meta($product->get_id(), '_shot_count', true);
+    $case_pack = get_post_meta($product->get_id(), '_case_pack', true);
+    $name = $product->get_name();
+    if ($shot_count) {
+        return $name . ' | ' . $shot_count . '-Shot Firework | Buy Online — OFO';
+    }
+    return $name . ' | Buy Fireworks Online — OFO';
+}
+
 // ============================================================
-// PHASE 6: Custom Pallet Builder shortcode
+// PHASE 6: Custom Pallet Builder shortcode (v2 — AJAX-powered)
 // ============================================================
 add_shortcode('ofo_pallet_builder', 'ofo_render_pallet_builder');
 function ofo_render_pallet_builder($atts) {
+    ofo_enqueue_pallet_builder_assets();
     ob_start();
+    $template = get_stylesheet_directory() . '/templates/pallet-builder.php';
+    if (file_exists($template)) { include $template; } else { echo '<p>Template not found.</p>'; }
+    return ob_get_clean();
+}
+function ofo_enqueue_pallet_builder_assets() {
+    $theme_uri = get_stylesheet_directory_uri();
+    $theme_dir = get_stylesheet_directory();
+    wp_enqueue_style('ofo-pallet-builder', $theme_uri . '/custom-css/pallet-builder.css', array(), filemtime($theme_dir . '/custom-css/pallet-builder.css'));
+    wp_enqueue_script('ofo-pallet-builder', $theme_uri . '/custom-js/pallet-builder.js', array('jquery'), filemtime($theme_dir . '/custom-js/pallet-builder.js'), true);
+    wp_localize_script('ofo-pallet-builder', 'ofo_pallet_data', array('ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('ofo_pallet_nonce'), 'cart_url' => wc_get_cart_url()));
+}
+add_action('wp_ajax_ofo_get_pallet_products', 'ofo_ajax_get_pallet_products');
+add_action('wp_ajax_nopriv_ofo_get_pallet_products', 'ofo_ajax_get_pallet_products');
+function ofo_ajax_get_pallet_products() {
+    check_ajax_referer('ofo_pallet_nonce', 'nonce');
+    $args = array('post_type' => 'product', 'post_status' => 'publish', 'posts_per_page' => 80, 'orderby' => 'menu_order', 'order' => 'ASC');
+    $query = new WP_Query($args);
+    $products = array();
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $product = wc_get_product(get_the_ID());
+            if (!$product || !$product->is_purchasable()) continue;
+            $terms = get_the_terms(get_the_ID(), 'product_cat');
+            $cats = array(); $cat_label = '';
+            if ($terms && !is_wp_error($terms)) {
+                foreach ($terms as $term) { $cats[] = $term->slug; }
+                foreach ($terms as $term) { if ($term->slug !== 'uncategorized') { $cat_label = $term->name; break; } }
+            }
+            $case_pack = $product->get_attribute('case_pack');
+            if (!$case_pack) $case_pack = get_post_meta(get_the_ID(), '_case_pack', true);
+            if (!$case_pack) $case_pack = 1;
+            $shot_count = $product->get_attribute('shot_count');
+            if (!$shot_count) $shot_count = get_post_meta(get_the_ID(), '_shot_count', true);
+            $retail_price = get_post_meta(get_the_ID(), '_retail_price', true);
+            $image_id = $product->get_image_id();
+            $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'woocommerce_thumbnail') : '';
+            $products[] = array('id' => $product->get_id(), 'name' => $product->get_name(), 'price' => $product->get_price(), 'retail_price' => $retail_price ? $retail_price : '', 'case_pack' => intval($case_pack), 'shot_count' => intval($shot_count), 'categories' => $cats, 'category_label' => $cat_label, 'image' => $image_url);
+        }
+        wp_reset_postdata();
+    }
+    if (empty($products)) { wp_send_json_error('No products found'); }
+    wp_send_json_success($products);
+}
+add_action('wp_ajax_ofo_add_pallet_to_cart', 'ofo_ajax_add_pallet_to_cart');
+add_action('wp_ajax_nopriv_ofo_add_pallet_to_cart', 'ofo_ajax_add_pallet_to_cart');
+function ofo_ajax_add_pallet_to_cart() {
+    check_ajax_referer('ofo_pallet_nonce', 'nonce');
+    $items = json_decode(wp_unslash($_POST['items']), true);
+    if (empty($items)) { wp_send_json_error('No items provided'); }
+    $errors = array();
+    foreach ($items as $item) {
+        $added = WC()->cart->add_to_cart(intval($item['product_id']), intval($item['quantity']));
+        if (!$added) { $p = wc_get_product(intval($item['product_id'])); $errors[] = $p ? $p->get_name() : 'Unknown'; }
+    }
+    if (!empty($errors)) { wp_send_json_error('Could not add: ' . implode(', ', $errors)); }
+    wp_send_json_success(array('cart_url' => wc_get_cart_url()));
+}
+
+// ============================================================
+// FEATURE 1: Price Match Guarantee Badge on product pages
+// ============================================================
+add_action('woocommerce_single_product_summary', 'ofo_price_match_badge', 25);
+function ofo_price_match_badge() {
+    echo '<div class="ofo-price-match-badge">
+        <span class="ofo-pm-icon">&#10003;</span>
+        <span><strong>Price Match Guarantee</strong> — Found it cheaper? We will match it.</span>
+    </div>';
+}
+
+// ============================================================
+// FEATURE 2: New Arrivals badge (auto on products under 60 days old)
+// ============================================================
+add_action('woocommerce_before_shop_loop_item_title', 'ofo_new_arrival_badge', 8);
+function ofo_new_arrival_badge() {
+    $created = get_the_date('U');
+    $days_old = (time() - $created) / (60 * 60 * 24);
+    if ($days_old <= 60) {
+        echo '<span class="ofo-new-badge">NEW</span>';
+    }
+}
+
+// ============================================================
+// FEATURE 3: FAQ Shortcode [ofo_faq]
+// ============================================================
+add_shortcode('ofo_faq', 'ofo_render_faq');
+function ofo_render_faq($atts) {
+    $faqs = array(
+        array('q' => 'Do you offer wholesale pricing?', 'a' => 'Yes — all products on OFO are sold at wholesale case pricing. No membership required, no minimum order. You get the same prices whether you buy 1 case or 100.'),
+        array('q' => 'What is your shipping policy?', 'a' => '\$99 flat rate shipping on orders over \$1,500. FREE shipping on orders over \$3,000. Orders ship via freight carrier directly to your door.'),
+        array('q' => 'How much cheaper are your prices vs retail?', 'a' => 'Our case pricing works out to roughly \$6-\$25 per unit depending on the product. Retail stores charge \$50-\$150+ per unit for the same items. You can save up to 87% buying wholesale from OFO.'),
+        array('q' => 'What is a case pack?', 'a' => 'A case pack is a bulk quantity of the same product. For example, a 6/1 case pack means 6 individual fireworks in one case. The price shown is for the entire case.'),
+        array('q' => 'Is there a minimum order?', 'a' => 'No minimum order required. Buy as little as one case of any product.'),
+        array('q' => 'What states do you ship to?', 'a' => 'We ship to most US states where consumer fireworks are legal. Contact us at 803-849-0221 to confirm your state before ordering.'),
+        array('q' => 'Do you offer a price match guarantee?', 'a' => 'Yes. If you find the same product cheaper at another wholesale fireworks retailer, contact us and we will match or beat their price.'),
+        array('q' => 'How do I track my order?', 'a' => 'Once your order ships you will receive a tracking number via email. Log into your account at any time to check your order status.'),
+        array('q' => 'What is your return policy?', 'a' => 'Due to the nature of fireworks, we do not accept returns on opened cases. Damaged or defective items will be replaced. Contact us within 7 days of delivery.'),
+        array('q' => 'Can I pick up my order?', 'a' => 'Yes — local pickup is available at our Georgia location. Call 803-849-0221 to arrange.'),
+    );
+    ob_start();
+    echo '<div class="ofo-faq-container">';
+    foreach ($faqs as $i => $faq) {
+        echo '<div class="ofo-faq-item">';
+        echo '<button class="ofo-faq-question" onclick="ofoToggleFaq(' . $i . ')">';
+        echo '<span>' . esc_html($faq['q']) . '</span>';
+        echo '<span class="ofo-faq-arrow" id="ofo-arrow-' . $i . '">+</span>';
+        echo '</button>';
+        echo '<div class="ofo-faq-answer" id="ofo-faq-' . $i . '"><p>' . esc_html($faq['a']) . '</p></div>';
+        echo '</div>';
+    }
+    echo '</div>';
+    echo '<script>function ofoToggleFaq(i){var el=document.getElementById("ofo-faq-"+i);var arrow=document.getElementById("ofo-arrow-"+i);var isOpen=el.style.display==="block";document.querySelectorAll(".ofo-faq-answer").forEach(function(e){e.style.display="none";});document.querySelectorAll(".ofo-faq-arrow").forEach(function(a){a.textContent="+";});if(!isOpen){el.style.display="block";arrow.textContent="−";}}</script>';
+    return ob_get_clean();
+}
+
+// ============================================================
+// FEATURE 4: Competitor price comparison on single product pages
+// ============================================================
+add_action('woocommerce_single_product_summary', 'ofo_competitor_comparison', 26);
+function ofo_competitor_comparison() {
+    global $product;
+    $case_pack = $product->get_attribute('case_pack');
+    if (!$case_pack) $case_pack = get_post_meta($product->get_id(), '_case_pack', true);
+    if (!$case_pack || !is_numeric($case_pack) || $case_pack <= 1) return;
+    $our_price = $product->get_price();
+    $our_unit = $our_price / intval($case_pack);
+    $retail_unit = $our_unit * 8;
+    echo '<div class="ofo-price-comparison">
+        <div class="ofo-pc-title">Price Comparison (per unit)</div>
+        <div class="ofo-pc-row"><span class="ofo-pc-store ofo-pc-us">OFO Wholesale</span><span class="ofo-pc-price ofo-pc-us-price">$' . number_format($our_unit, 2) . '</span></div>
+        <div class="ofo-pc-row"><span class="ofo-pc-store">Retail Store Avg</span><span class="ofo-pc-price ofo-pc-retail">~$' . number_format($retail_unit, 2) . '</span></div>
+        <div class="ofo-pc-savings">You save ~' . round((1 - $our_unit/$retail_unit) * 100) . '% buying wholesale from OFO</div>
+    </div>';
+}
+
+// ============================================================
+// FEATURE 5: New Arrivals category — auto query products under 60 days
+// ============================================================
+add_shortcode('ofo_new_arrivals', 'ofo_render_new_arrivals');
+function ofo_render_new_arrivals($atts) {
+    $atts = shortcode_atts(array('limit' => 8), $atts);
     $args = array(
         'post_type' => 'product',
-        'posts_per_page' => 24,
+        'posts_per_page' => intval($atts['limit']),
         'post_status' => 'publish',
-        'tax_query' => array(array(
-            'taxonomy' => 'product_cat',
-            'field' => 'slug',
-            'terms' => array('500g-cakes', '200g-cakes', 'artillery'),
-        )),
+        'date_query' => array(array('after' => '60 days ago')),
+        'orderby' => 'date',
+        'order' => 'DESC',
     );
-    $products = new WP_Query($args);
-    $template = get_stylesheet_directory() . '/templates/pallet-builder.php';
-    if (file_exists($template)) {
-        include $template;
-    } else {
-        echo '<p>Pallet builder template not found.</p>';
+    $query = new WP_Query($args);
+    if (!$query->have_posts()) return '<p>No new arrivals yet.</p>';
+    ob_start();
+    echo '<div class="ofo-new-arrivals-grid">';
+    while ($query->have_posts()) {
+        $query->the_post();
+        $product = wc_get_product(get_the_ID());
+        $img = get_the_post_thumbnail_url(get_the_ID(), 'medium') ?: wc_placeholder_img_src();
+        echo '<div class="ofo-na-card">';
+        echo '<span class="ofo-new-badge">NEW</span>';
+        echo '<a href="' . get_permalink() . '"><img src="' . esc_url($img) . '" alt="' . get_the_title() . '"></a>';
+        echo '<div class="ofo-na-body"><h4><a href="' . get_permalink() . '">' . get_the_title() . '</a></h4>';
+        echo '<span class="ofo-na-price">' . $product->get_price_html() . '</span></div>';
+        echo '</div>';
     }
+    echo '</div>';
+    wp_reset_postdata();
     return ob_get_clean();
+}
+
+// ============================================================
+// FEATURE 6: Help Center shortcode [ofo_help_center]
+// ============================================================
+add_shortcode('ofo_help_center', 'ofo_render_help_center');
+function ofo_render_help_center($atts) {
+    $topics = array(
+        array('icon' => '&#128666;', 'title' => 'Orders & Shipping', 'desc' => 'Track orders, shipping rates, delivery times', 'link' => '/faq/#shipping'),
+        array('icon' => '&#128176;', 'title' => 'Pricing & Savings', 'desc' => 'Wholesale pricing, case packs, how to save', 'link' => '/faq/#pricing'),
+        array('icon' => '&#128722;', 'title' => 'Returns & Damage', 'desc' => 'Damaged items, return policy, replacements', 'link' => '/faq/#returns'),
+        array('icon' => '&#128222;', 'title' => 'Contact Us', 'desc' => '803-849-0221 · Weekdays 8am-4pm EST', 'link' => '/contact/'),
+        array('icon' => '&#128293;', 'title' => 'Product Questions', 'desc' => 'Case packs, shot counts, effects explained', 'link' => '/faq/#products'),
+        array('icon' => '&#128508;', 'title' => 'State Shipping Laws', 'desc' => 'Which states we can ship fireworks to', 'link' => '/faq/#states'),
+    );
+    ob_start();
+    echo '<div class="ofo-help-grid">';
+    foreach ($topics as $t) {
+        echo '<a href="' . $t['link'] . '" class="ofo-help-card">';
+        echo '<div class="ofo-help-icon">' . $t['icon'] . '</div>';
+        echo '<h3>' . $t['title'] . '</h3>';
+        echo '<p>' . $t['desc'] . '</p>';
+        echo '</a>';
+    }
+    echo '</div>';
+    return ob_get_clean();
+}
+
+// ============================================================
+// FEATURE 7: Merica's Birthday Bash Countdown [ofo_countdown]
+// ============================================================
+add_shortcode('ofo_countdown', 'ofo_render_countdown');
+function ofo_render_countdown($atts) {
+    $atts = shortcode_atts(array(
+        'target' => '2026-07-04T00:00:00',
+        'timezone' => 'America/New_York',
+    ), $atts);
+
+    $theme_uri = get_stylesheet_directory_uri();
+    $theme_dir = get_stylesheet_directory();
+
+    wp_enqueue_style('ofo-countdown', $theme_uri . '/custom-css/countdown.css', array(), filemtime($theme_dir . '/custom-css/countdown.css'));
+    wp_enqueue_script('ofo-countdown', $theme_uri . '/custom-js/countdown.js', array(), filemtime($theme_dir . '/custom-js/countdown.js'), true);
+
+    // Search media library for eagle image
+    $eagle_url = '';
+    $eagle_args = array(
+        'post_type'      => 'attachment',
+        'post_mime_type' => 'image',
+        'post_status'    => 'inherit',
+        'posts_per_page' => 1,
+        's'              => 'eagle',
+    );
+    $eagle_query = new WP_Query($eagle_args);
+    if ($eagle_query->have_posts()) {
+        $eagle_query->the_post();
+        $eagle_url = wp_get_attachment_image_url(get_the_ID(), 'medium_large');
+        wp_reset_postdata();
+    }
+    if (!$eagle_url) {
+        // Fallback: search by filename pattern
+        global $wpdb;
+        $row = $wpdb->get_row("SELECT ID FROM {$wpdb->posts} WHERE post_type='attachment' AND post_mime_type LIKE 'image/%' AND guid LIKE '%eagle%' LIMIT 1");
+        if ($row) {
+            $eagle_url = wp_get_attachment_image_url($row->ID, 'medium_large');
+        }
+    }
+
+    ob_start();
+    ?>
+    <section class="ofo-countdown-section" id="ofo-countdown-section" data-target="<?php echo esc_attr($atts['target']); ?>">
+      <div class="ofo-cd-stars" aria-hidden="true"></div>
+      <div class="ofo-cd-inner">
+        <?php if ($eagle_url) : ?>
+        <div class="ofo-cd-eagle-wrap">
+          <img src="<?php echo esc_url($eagle_url); ?>" alt="OFO Eagle Mascot" class="ofo-cd-eagle">
+        </div>
+        <?php endif; ?>
+        <h2 class="ofo-cd-title">MERICA'S BIRTHDAY BASH 🎆</h2>
+        <p class="ofo-cd-subtitle">The biggest fireworks sale of the year — deals drop when the clock hits zero</p>
+        <div class="ofo-cd-timer" id="ofo-cd-timer">
+          <div class="ofo-cd-unit">
+            <div class="ofo-cd-flip" id="ofo-cd-days"><span class="ofo-cd-num">00</span></div>
+            <span class="ofo-cd-label">Days</span>
+          </div>
+          <div class="ofo-cd-sep">:</div>
+          <div class="ofo-cd-unit">
+            <div class="ofo-cd-flip" id="ofo-cd-hours"><span class="ofo-cd-num">00</span></div>
+            <span class="ofo-cd-label">Hours</span>
+          </div>
+          <div class="ofo-cd-sep">:</div>
+          <div class="ofo-cd-unit">
+            <div class="ofo-cd-flip" id="ofo-cd-mins"><span class="ofo-cd-num">00</span></div>
+            <span class="ofo-cd-label">Minutes</span>
+          </div>
+          <div class="ofo-cd-sep">:</div>
+          <div class="ofo-cd-unit">
+            <div class="ofo-cd-flip" id="ofo-cd-secs"><span class="ofo-cd-num">00</span></div>
+            <span class="ofo-cd-label">Seconds</span>
+          </div>
+        </div>
+        <div class="ofo-cd-live" id="ofo-cd-live" style="display:none;">
+          <span class="ofo-cd-live-text">🎉 THE SALE IS LIVE!</span>
+        </div>
+        <a href="/shop/" class="ofo-cd-cta" id="ofo-cd-cta">Shop the Sale</a>
+      </div>
+    </section>
+    <?php
+    return ob_get_clean();
+}
+
+// ============================================================
+// Unified shipping message — removes conflicting messages
+// ============================================================
+add_filter('woocommerce_free_shipping_threshold', 'ofo_unified_shipping_threshold');
+function ofo_unified_shipping_threshold($threshold) {
+    return 1500;
+}
+
+// Override any hardcoded free shipping notice strings
+add_filter('gettext', 'ofo_unified_shipping_text', 20, 3);
+function ofo_unified_shipping_text($translated, $original, $domain) {
+    $replacements = array(
+        'Free Shipping above $2000' => '🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500',
+        'Free shipping on orders over $2000' => '🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500',
+        'Free shipping on orders over $2,000' => '🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500',
+        '$99 Shipping on Orders Over $1500' => '🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500',
+        '$99 Shipping on Orders Over $1,500' => '🚚 $99 Flat Rate Shipping · FREE on Orders Over $1,500',
+    );
+    foreach ($replacements as $old => $new) {
+        if (strpos($translated, $old) !== false) {
+            $translated = str_replace($old, $new, $translated);
+        }
+    }
+    return $translated;
+}
+
+// ============================================================
+// Rotating announcement bar
+// ============================================================
+add_action('wp_body_open', 'ofo_announcement_bar');
+function ofo_announcement_bar() {
+    ?>
+    <div id="ofo-announcement-bar">
+        <div class="ofo-announcement-track">
+            <div class="ofo-announcement-slide active">🚚 FREE Shipping on Orders Over $1,500 — No Minimum Order</div>
+            <div class="ofo-announcement-slide">💥 Up to 87% Cheaper Per Unit Than Buying Retail</div>
+            <div class="ofo-announcement-slide">🏆 Wholesale Pricing on 500g Cakes, Artillery &amp; Pallet Packs</div>
+        </div>
+    </div>
+    <?php
+}
+
+// Enqueue announcement bar assets
+add_action('wp_enqueue_scripts', 'ofo_enqueue_announcement_assets');
+function ofo_enqueue_announcement_assets() {
+    $theme_uri = get_stylesheet_directory_uri();
+    $theme_dir = get_stylesheet_directory();
+    wp_enqueue_style('ofo-announcement-bar', $theme_uri . '/custom-css/announcement-bar.css', array(), filemtime($theme_dir . '/custom-css/announcement-bar.css'));
+    wp_enqueue_script('ofo-announcement-bar', $theme_uri . '/custom-js/announcement-bar.js', array(), filemtime($theme_dir . '/custom-js/announcement-bar.js'), true);
+    wp_enqueue_style('ofo-hero', $theme_uri . '/custom-css/hero.css', array(), filemtime($theme_dir . '/custom-css/hero.css'));
+    wp_enqueue_style('ofo-woocommerce-overrides', $theme_uri . '/custom-css/woocommerce-overrides.css', array(), filemtime($theme_dir . '/custom-css/woocommerce-overrides.css'));
+}
+
+// ============================================================
+// Hero banner shortcodes
+// ============================================================
+add_shortcode('ofo_hero_main', 'ofo_render_hero_main');
+function ofo_render_hero_main($atts) {
+    ob_start(); ?>
+    <div class="ofo-hero ofo-hero--main">
+        <div class="ofo-hero__overlay"></div>
+        <div class="ofo-hero__content">
+            <p class="ofo-hero__eyebrow">🇺🇸 America's #1 Wholesale Fireworks</p>
+            <h1 class="ofo-hero__headline">AMERICA'S BEST PRICE ON FIREWORKS</h1>
+            <p class="ofo-hero__subhead">Wholesale Case Pricing — Up to 87% Cheaper Than Local Stores</p>
+            <div class="ofo-hero__proof">
+                <span>✅ No Minimum Order</span>
+                <span>✅ Free Ship Over $1,500</span>
+                <span>✅ Case Pricing = Massive Savings</span>
+            </div>
+            <div class="ofo-hero__ctas">
+                <a href="/product-category/500g-cakes/" class="ofo-hero__btn ofo-hero__btn--primary">SHOP 500G CAKES</a>
+                <a href="/build-your-pallet/" class="ofo-hero__btn ofo-hero__btn--secondary">BUILD YOUR PALLET</a>
+            </div>
+        </div>
+    </div>
+    <?php return ob_get_clean();
+}
+
+add_shortcode('ofo_hero_sale', 'ofo_render_hero_sale');
+function ofo_render_hero_sale($atts) {
+    ob_start(); ?>
+    <div class="ofo-hero ofo-hero--sale">
+        <div class="ofo-hero__overlay"></div>
+        <div class="ofo-hero__content">
+            <p class="ofo-hero__eyebrow">🔥 Limited Time Sale</p>
+            <h2 class="ofo-hero__headline">GOING FOR GOLD — 10% OFF SITEWIDE</h2>
+            <p class="ofo-hero__subhead">+ Win a $500 OFO Store Credit · Ends July 4th</p>
+            <div class="ofo-hero__ctas">
+                <a href="/shop/" class="ofo-hero__btn ofo-hero__btn--primary">CLAIM YOUR DISCOUNT</a>
+            </div>
+        </div>
+    </div>
+    <?php return ob_get_clean();
+}
+
+// ============================================================
+// WooCommerce webhook trigger for social automation
+// ============================================================
+add_action('woocommerce_new_product', 'ofo_trigger_social_automation', 10, 1);
+function ofo_trigger_social_automation($product_id) {
+    $product = wc_get_product($product_id);
+    if (!$product) return;
+
+    $case_pack = $product->get_attribute('case_pack');
+    if (!$case_pack) $case_pack = get_post_meta($product_id, '_case_pack', true);
+
+    $shot_count = $product->get_attribute('shot_count');
+    if (!$shot_count) $shot_count = get_post_meta($product_id, '_shot_count', true);
+
+    $terms = get_the_terms($product_id, 'product_cat');
+    $category = '';
+    if ($terms && !is_wp_error($terms)) {
+        foreach ($terms as $term) {
+            if ($term->slug !== 'uncategorized') {
+                $category = $term->name;
+                break;
+            }
+        }
+    }
+
+    $image_id = $product->get_image_id();
+    $image_url = $image_id ? wp_get_attachment_url($image_id) : '';
+
+    // Log the product data for Make.com to pick up via webhook
+    $payload = array(
+        'product_id'   => $product_id,
+        'product_name' => $product->get_name(),
+        'price'        => $product->get_price(),
+        'case_pack'    => $case_pack ? $case_pack : 1,
+        'shot_count'   => $shot_count ? $shot_count : 0,
+        'category'     => $category,
+        'image_url'    => $image_url,
+        'permalink'    => get_permalink($product_id),
+    );
+
+    // Store as transient so it can be retrieved if needed
+    set_transient('ofo_new_product_' . $product_id, $payload, 24 * HOUR_IN_SECONDS);
 }

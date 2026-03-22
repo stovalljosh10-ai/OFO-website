@@ -1,0 +1,132 @@
+.ofo-hero {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: linear-gradient(135deg, #003087 0%, #CC1C2E 100%);
+}
+
+.ofo-hero--sale {
+    background: linear-gradient(135deg, #1a1a2e 0%, #CC1C2E 60%, #F5A623 100%);
+    min-height: 400px;
+}
+
+.ofo-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1;
+}
+
+.ofo-hero__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 60px 24px;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.ofo-hero__eyebrow {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #F5A623;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 16px;
+}
+
+.ofo-hero__headline {
+    font-size: clamp(2.2rem, 5vw, 4.5rem);
+    font-weight: 800;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    text-shadow: 2px 4px 12px rgba(0,0,0,0.4);
+    margin: 0 0 20px;
+}
+
+.ofo-hero__subhead {
+    font-size: clamp(1rem, 2vw, 1.35rem);
+    font-weight: 500;
+    color: rgba(255,255,255,0.92);
+    margin: 0 0 24px;
+}
+
+.ofo-hero__proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+.ofo-hero__proof span {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.15);
+    padding: 6px 14px;
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+.ofo-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+}
+
+.ofo-hero__btn {
+    display: inline-block;
+    padding: 16px 36px;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
+}
+
+.ofo-hero__btn--primary {
+    background: #CC1C2E;
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(204,28,46,0.5);
+}
+
+.ofo-hero__btn--primary:hover {
+    background: #9E1522;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(204,28,46,0.65);
+    color: #ffffff;
+}
+
+.ofo-hero__btn--secondary {
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.6);
+}
+
+.ofo-hero__btn--secondary:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+    color: #ffffff;
+}
+
+@media (max-width: 600px) {
+    .ofo-hero {
+        min-height: 400px;
+    }
+    .ofo-hero__btn {
+        padding: 14px 24px;
+        font-size: 0.95rem;
+    }
+    .ofo-hero__proof {
+        gap: 10px;
+    }
+}
