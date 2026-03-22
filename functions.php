@@ -258,27 +258,39 @@ add_action('wp_footer', function() {
 // All slider content is managed here for easy editing
 function get_homepage_slider_data() {
     return array(
-        // Slide 1 — Main hero
+        // Slide 1 — America's 250th Birthday
         array(
             'desktop_image' => '/wp-content/uploads/2026/02/2OFO-Hero-Background.jpg',
             'mobile_image' => '/wp-content/uploads/2026/02/1OFO-Hero-Background-Mobile.jpg',
-            'small_text' => 'WHOLESALE CASE PRICING — NO MINIMUM ORDER',
-            'heading' => "AMERICA'S BEST PRICE<br>ON FIREWORKS",
-            'description' => 'Up to 87% Cheaper Per Unit Than Local Stores',
-            'button_text' => 'SHOP 500G CAKES',
+            'small_text' => '🇺🇸 JULY 4TH, 2026 — AMERICA TURNS 250',
+            'heading' => "250 YEARS OF FREEDOM.<br>CELEBRATE LIKE IT.",
+            'description' => 'The Biggest Birthday in American History Deserves the Biggest Fireworks Show — Wholesale Pricing, No Minimum Order',
+            'button_text' => 'SHOP THE 250TH COLLECTION',
             'button_url' => '/product-category/aerial-fireworks/500g-cakes/',
             'button2_text' => 'BUILD YOUR PALLET',
-            'button2_url' => '/product-category/pallet-packs/',
+            'button2_url' => '/build-your-custom-pallet/',
         ),
-        // Slide 2 — Sale banner
+        // Slide 2 — Price punch
         array(
-            'desktop_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero.jpg',
-            'mobile_image' => '/wp-content/uploads/2026/01/OFO-Going-For-Gold-Sale-Hero-Mobile.jpg',
-            'small_text' => '10% OFF SITEWIDE + WIN A $500 OFO CREDIT',
-            'heading' => 'GOING FOR GOLD<br>SALE NOW LIVE!',
-            'description' => 'Limited time — claim your discount before it ends',
-            'button_text' => 'CLAIM YOUR DISCOUNT',
-            'button_url' => '/product-category/pallet-packs/',
+            'desktop_image' => '/wp-content/uploads/2026/02/2OFO-Hero-Background.jpg',
+            'mobile_image' => '/wp-content/uploads/2026/02/1OFO-Hero-Background-Mobile.jpg',
+            'small_text' => '💥 WHOLESALE CASE PRICING — UP TO 87% CHEAPER',
+            'heading' => "DON'T BUY RETAIL.<br>BUY WHOLESALE.",
+            'description' => 'Why Pay $67 Per Firework When You Can Pay $8? Same Products. Case Pricing. Massive Savings.',
+            'button_text' => 'SEE THE SAVINGS',
+            'button_url' => '/build-your-custom-pallet/',
+            'button2_text' => 'SHOP ALL FIREWORKS',
+            'button2_url' => '/shop/',
+        ),
+        // Slide 3 — Pallet builder push
+        array(
+            'desktop_image' => '/wp-content/uploads/2026/02/2OFO-Hero-Background.jpg',
+            'mobile_image' => '/wp-content/uploads/2026/02/1OFO-Hero-Background-Mobile.jpg',
+            'small_text' => 'AMERICA\'S #1 WHOLESALE FIREWORKS',
+            'heading' => "BUILD YOUR<br>DREAM SHOW.",
+            'description' => 'Mix 500g Cakes, Artillery & Ground Effects — See Your Savings Live as You Build',
+            'button_text' => 'BUILD YOUR PALLET NOW',
+            'button_url' => '/build-your-custom-pallet/',
         ),
     );
 }
