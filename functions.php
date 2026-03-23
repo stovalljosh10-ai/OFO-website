@@ -420,14 +420,24 @@ function ofo_ajax_get_pallet_products() {
                 foreach ($terms as $term) { $cats[] = $term->slug; }
                 foreach ($terms as $term) { if ($term->slug !== 'uncategorized') { $cat_label = $term->name; break; } }
             }
+            $desc = $product->get_description() . ' ' . $product->get_short_description() . ' ' . $product->get_name();
+
+            // Case pack: check attribute, custom field, then auto-extract from description
             $case_pack = $product->get_attribute('case_pack');
             if (!$case_pack) $case_pack = get_post_meta(get_the_ID(), '_case_pack', true);
-            if (!$case_pack) $case_pack = 1;
+            if (!$case_pack || intval($case_pack) <= 0) {
+                // Auto-extract: "6/1", "4/1", "12/1", "Packed 6/1", "Case 4/1"
+                if (preg_match('/(\d+)\s*\/\s*1\b/', $desc, $m)) {
+                    $case_pack = intval($m[1]);
+                }
+            }
+            if (!$case_pack || intval($case_pack) <= 0) $case_pack = 1;
+
+            // Shot count: check attribute, custom field, then auto-extract from description
             $shot_count = $product->get_attribute('shot_count');
             if (!$shot_count) $shot_count = get_post_meta(get_the_ID(), '_shot_count', true);
-            if (!$shot_count) {
-                // Auto-extract from description: "25 shots", "100-shot", "16 Shot", etc.
-                $desc = $product->get_description() . ' ' . $product->get_short_description() . ' ' . $product->get_name();
+            if (!$shot_count || intval($shot_count) <= 0) {
+                // Auto-extract: "25 shots", "100-shot", "16 Shot", "9-Shot"
                 if (preg_match('/(\d+)\s*[-\s]?\s*shots?/i', $desc, $m)) {
                     $shot_count = intval($m[1]);
                 }
