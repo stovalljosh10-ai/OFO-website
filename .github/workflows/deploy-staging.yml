@@ -12,32 +12,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy files via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: 64.227.108.149
-          username: caruyuloru8018
-          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
-          port: 22
-          script: |
-            THEME="/var/www/html/wp-content/themes/bricks-child"
-            REPO="https://raw.githubusercontent.com/stovalljosh10-ai/OFO-website/dev"
-            cd "$THEME"
-            curl -sL "$REPO/functions.php" -o functions.php
-            curl -sL "$REPO/style.css" -o style.css
-            curl -sL "$REPO/single-product.php" -o single-product.php
-            mkdir -p custom-css custom-js includes templates woocommerce
-            for f in announcement-bar.css countdown.css hero.css pallet-builder.css woocommerce-overrides.css ofo-overrides.css; do
-              curl -sL "$REPO/custom-css/$f" -o "custom-css/$f" 2>/dev/null
-            done
-            for f in announcement-bar.js countdown.js pallet-builder.js ofo-main.js; do
-              curl -sL "$REPO/custom-js/$f" -o "custom-js/$f" 2>/dev/null
-            done
-            for f in header-main.php footer-main.php homepage-slider.php homepage-recproducts.php homepage-content.php homepage-review.php loyalty-floating-button.php loyalty-rewards-content.php setup-hero.php setup-pallet-page.php; do
-              curl -sL "$REPO/includes/$f" -o "includes/$f" 2>/dev/null
-            done
-            curl -sL "$REPO/templates/pallet-builder.php" -o "templates/pallet-builder.php"
-            curl -sL "$REPO/woocommerce/archive-product.php" -o "woocommerce/archive-product.php"
-            echo "=== VERIFY ==="
-            grep -c "findProduct" custom-js/pallet-builder.js && echo "NEW FILE OK" || echo "OLD FILE STILL"
-            echo "Deploy complete: $(date)"
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy files to server
+        env:
+          SSHPASS: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+        run: |
+          REMOTE="caruyuloru8018@64.227.108.149"
+          THEME="/var/www/html/wp-content/themes/bricks-child"
+          OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+          # Upload root PHP/CSS files
+          sshpass -e scp $OPTS functions.php style.css single-product.php "$REMOTE:$THEME/"
+
+          # Create dirs and upload
+          sshpass -e ssh $OPTS "$REMOTE" "mkdir -p $THEME/custom-css $THEME/custom-js $THEME/includes $THEME/includes/social-automation $THEME/templates $THEME/woocommerce"
+
+          sshpass -e scp $OPTS custom-css/* "$REMOTE:$THEME/custom-css/"
+          sshpass -e scp $OPTS custom-js/* "$REMOTE:$THEME/custom-js/"
+          sshpass -e scp $OPTS includes/*.php "$REMOTE:$THEME/includes/"
+          sshpass -e scp $OPTS templates/* "$REMOTE:$THEME/templates/"
+          sshpass -e scp $OPTS woocommerce/* "$REMOTE:$THEME/woocommerce/"
+
+          # Verify
+          sshpass -e ssh $OPTS "$REMOTE" "grep -c findProduct $THEME/custom-js/pallet-builder.js && echo 'DEPLOY VERIFIED' || echo 'DEPLOY FAILED'"
