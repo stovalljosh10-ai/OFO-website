@@ -37,6 +37,9 @@ add_filter( 'bricks/builder/i18n', function( $i18n ) {
   return $i18n;
 } );
 
+// Product CSV export tool (admin only)
+require_once get_stylesheet_directory() . '/includes/export-products-csv.php';
+
 // Only load custom tweaks if ?notest is not present in the URL.
 if (! isset($_GET['notest'])) {
   require_once get_stylesheet_directory() . '/includes/footer-main.php';
