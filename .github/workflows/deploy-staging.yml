@@ -12,30 +12,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
+      - name: Deploy via tar over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 64.227.108.149
+          username: caruyuloru8018
+          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+          port: 22
+          script_stop: true
+          script: |
+            echo "Connected"
 
-      - name: Deploy files to server
-        env:
-          INSTAWP_SSH_PASSWORD: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+      - name: Create and transfer archive
         run: |
-          export SSHPASS="$INSTAWP_SSH_PASSWORD"
-          HOST="caruyuloru8018@64.227.108.149"
-          THEME="/var/www/html/wp-content/themes/bricks-child"
-          SSH="sshpass -e ssh -o StrictHostKeyChecking=no -p 22"
-          SCP="sshpass -e scp -o StrictHostKeyChecking=no -P 22"
+          # Create archive
+          tar czf deploy.tar.gz functions.php style.css single-product.php custom-css/ custom-js/ includes/ templates/ woocommerce/
 
-          # Test connection
-          $SSH $HOST "echo 'SSH OK'"
+          # Install sshpass
+          sudo apt-get install -y -qq sshpass 2>/dev/null
 
-          # Create tar of all theme files
-          tar czf /tmp/deploy.tar.gz functions.php style.css single-product.php custom-css/ custom-js/ includes/ templates/ woocommerce/
-
-          # Upload tar
-          $SCP /tmp/deploy.tar.gz "$HOST:/tmp/deploy.tar.gz"
-
-          # Extract on server
-          $SSH $HOST "cd $THEME && tar xzf /tmp/deploy.tar.gz && rm -f /tmp/deploy.tar.gz && echo 'Extract OK'"
-
-          # Verify
-          $SSH $HOST "grep -c findProduct $THEME/custom-js/pallet-builder.js && echo 'DEPLOY VERIFIED' || echo 'DEPLOY FAILED'"
+          # Upload and extract
+          export SSHPASS="${{ secrets.INSTAWP_SSH_PASSWORD }}"
+          sshpass -e scp -o StrictHostKeyChecking=no -P 22 deploy.tar.gz caruyuloru8018@64.227.108.149:/tmp/deploy.tar.gz
+          sshpass -e ssh -o StrictHostKeyChecking=no -p 22 caruyuloru8018@64.227.108.149 "cd /var/www/html/wp-content/themes/bricks-child && tar xzf /tmp/deploy.tar.gz && rm /tmp/deploy.tar.gz && grep -c findProduct custom-js/pallet-builder.js && echo DEPLOY_OK || echo DEPLOY_FAILED"
