@@ -9,6 +9,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger InstaWP Deployment
-        run: |
-          curl -X POST "https://app.instawp.io/deployments/site/webhook/ff4d91fa-817b-4573-b8e7-cca2978994ff"
+      - name: Deploy via SSH to InstaWP Staging
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 64.227.108.149
+          username: caruyuloru8018
+          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+          port: 22
+          script: |
+            cd /var/www/html/wp-content/themes/bricks-child
+            git clone https://github.com/stovalljosh10-ai/OFO-website.git temp-repo 2>/dev/null || (cd temp-repo && git pull)
+            cp -rf temp-repo/. ./
+            rm -rf temp-repo/.git
