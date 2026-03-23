@@ -1,11 +1,16 @@
-<?php 
+<?php
+// Safe filemtime — returns fallback version if file doesn't exist
+function ofo_filemtime($path) {
+    return file_exists($path) ? filemtime($path) : '1.0.0';
+}
+
 /**
  * Register/enqueue custom scripts and styles
  */
 add_action( 'wp_enqueue_scripts', function() {
 	// Enqueue your files on the canvas & frontend, not the builder panel. Otherwise custom CSS might affect builder)
 	if ( ! bricks_is_builder_main() ) {
-		wp_enqueue_style( 'bricks-child', get_stylesheet_uri(), ['bricks-frontend'], filemtime( get_stylesheet_directory() . '/style.css' ) );
+		wp_enqueue_style( 'bricks-child', get_stylesheet_uri(), ['bricks-frontend'], ofo_filemtime( get_stylesheet_directory() . '/style.css' ) );
 	}
 } );
 
@@ -393,8 +398,8 @@ function ofo_render_pallet_builder($atts) {
 function ofo_enqueue_pallet_builder_assets() {
     $theme_uri = get_stylesheet_directory_uri();
     $theme_dir = get_stylesheet_directory();
-    wp_enqueue_style('ofo-pallet-builder', $theme_uri . '/custom-css/pallet-builder.css', array(), filemtime($theme_dir . '/custom-css/pallet-builder.css'));
-    wp_enqueue_script('ofo-pallet-builder', $theme_uri . '/custom-js/pallet-builder.js', array('jquery'), filemtime($theme_dir . '/custom-js/pallet-builder.js'), true);
+    wp_enqueue_style('ofo-pallet-builder', $theme_uri . '/custom-css/pallet-builder.css', array(), ofo_filemtime($theme_dir . '/custom-css/pallet-builder.css'));
+    wp_enqueue_script('ofo-pallet-builder', $theme_uri . '/custom-js/pallet-builder.js', array('jquery'), ofo_filemtime($theme_dir . '/custom-js/pallet-builder.js'), true);
     wp_localize_script('ofo-pallet-builder', 'ofo_pallet_data', array('ajax_url' => admin_url('admin-ajax.php'), 'nonce' => wp_create_nonce('ofo_pallet_nonce'), 'cart_url' => wc_get_cart_url()));
 }
 add_action('wp_ajax_ofo_get_pallet_products', 'ofo_ajax_get_pallet_products');
@@ -611,8 +616,8 @@ function ofo_render_countdown($atts) {
     $theme_uri = get_stylesheet_directory_uri();
     $theme_dir = get_stylesheet_directory();
 
-    wp_enqueue_style('ofo-countdown', $theme_uri . '/custom-css/countdown.css', array(), filemtime($theme_dir . '/custom-css/countdown.css'));
-    wp_enqueue_script('ofo-countdown', $theme_uri . '/custom-js/countdown.js', array(), filemtime($theme_dir . '/custom-js/countdown.js'), true);
+    wp_enqueue_style('ofo-countdown', $theme_uri . '/custom-css/countdown.css', array(), ofo_filemtime($theme_dir . '/custom-css/countdown.css'));
+    wp_enqueue_script('ofo-countdown', $theme_uri . '/custom-js/countdown.js', array(), ofo_filemtime($theme_dir . '/custom-js/countdown.js'), true);
 
     // Search media library for eagle image
     $eagle_url = '';
@@ -728,10 +733,10 @@ add_action('wp_enqueue_scripts', 'ofo_enqueue_announcement_assets');
 function ofo_enqueue_announcement_assets() {
     $theme_uri = get_stylesheet_directory_uri();
     $theme_dir = get_stylesheet_directory();
-    wp_enqueue_style('ofo-announcement-bar', $theme_uri . '/custom-css/announcement-bar.css', array(), filemtime($theme_dir . '/custom-css/announcement-bar.css'));
-    wp_enqueue_script('ofo-announcement-bar', $theme_uri . '/custom-js/announcement-bar.js', array(), filemtime($theme_dir . '/custom-js/announcement-bar.js'), true);
-    wp_enqueue_style('ofo-hero', $theme_uri . '/custom-css/hero.css', array(), filemtime($theme_dir . '/custom-css/hero.css'));
-    wp_enqueue_style('ofo-woocommerce-overrides', $theme_uri . '/custom-css/woocommerce-overrides.css', array(), filemtime($theme_dir . '/custom-css/woocommerce-overrides.css'));
+    wp_enqueue_style('ofo-announcement-bar', $theme_uri . '/custom-css/announcement-bar.css', array(), ofo_filemtime($theme_dir . '/custom-css/announcement-bar.css'));
+    wp_enqueue_script('ofo-announcement-bar', $theme_uri . '/custom-js/announcement-bar.js', array(), ofo_filemtime($theme_dir . '/custom-js/announcement-bar.js'), true);
+    wp_enqueue_style('ofo-hero', $theme_uri . '/custom-css/hero.css', array(), ofo_filemtime($theme_dir . '/custom-css/hero.css'));
+    wp_enqueue_style('ofo-woocommerce-overrides', $theme_uri . '/custom-css/woocommerce-overrides.css', array(), ofo_filemtime($theme_dir . '/custom-css/woocommerce-overrides.css'));
 }
 
 // ============================================================
