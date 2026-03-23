@@ -9,25 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create deploy archive
-        run: |
-          tar czf deploy.tar.gz functions.php style.css single-product.php custom-css/ custom-js/ includes/ templates/ woocommerce/
-          ls -la deploy.tar.gz
-
-      - name: Copy archive to server
-        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
-        with:
-          host: 64.227.108.149
-          user: caruyuloru8018
-          pass: ${{ secrets.INSTAWP_SSH_PASSWORD }}
-          port: 22
-          scp: |
-            './deploy.tar.gz' => '/tmp/deploy.tar.gz'
-
-      - name: Extract on server
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 64.227.108.149
@@ -36,7 +18,17 @@ jobs:
           port: 22
           script: |
             cd /var/www/html/wp-content/themes/bricks-child
-            tar xzf /tmp/deploy.tar.gz
-            rm -f /tmp/deploy.tar.gz
+            rm -rf /tmp/ofo-deploy
+            git clone --branch dev --depth 1 https://${{ secrets.GH_PAT }}@github.com/stovalljosh10-ai/OFO-website.git /tmp/ofo-deploy
+            cp -f /tmp/ofo-deploy/functions.php ./functions.php
+            cp -f /tmp/ofo-deploy/style.css ./style.css
+            cp -f /tmp/ofo-deploy/single-product.php ./single-product.php 2>/dev/null || true
+            rm -rf ./custom-css ./custom-js ./includes ./templates ./woocommerce
+            cp -rf /tmp/ofo-deploy/custom-css ./custom-css
+            cp -rf /tmp/ofo-deploy/custom-js ./custom-js
+            cp -rf /tmp/ofo-deploy/includes ./includes
+            cp -rf /tmp/ofo-deploy/templates ./templates
+            cp -rf /tmp/ofo-deploy/woocommerce ./woocommerce
+            rm -rf /tmp/ofo-deploy
             grep -c findProduct custom-js/pallet-builder.js && echo "DEPLOY OK" || echo "DEPLOY FAILED"
             echo "Deploy complete: $(date)"
