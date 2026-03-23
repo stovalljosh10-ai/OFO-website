@@ -9,18 +9,19 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH to InstaWP Staging
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Deploy via SCP to InstaWP Staging
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: 64.227.108.149
           username: caruyuloru8018
           password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
           port: 22
-          script: |
-            THEME_DIR="/var/www/html/wp-content/themes/bricks-child"
-            cd "$THEME_DIR"
-            rm -rf temp-repo
-            git clone --branch dev --single-branch https://github.com/stovalljosh10-ai/OFO-website.git temp-repo
-            rsync -av --exclude='.git' temp-repo/ "$THEME_DIR/"
-            rm -rf temp-repo
-            echo "Deploy complete: $(date)"
+          source: ".,!.git,!.github,!OFO-Ad-Copy-Toolkit-2025.docx,!OFO-Brand-Positioning-2025.docx,!_PROJECT-PROMPT.md,!README.md,!.DS_Store"
+          target: /var/www/html/wp-content/themes/bricks-child/
+          overwrite: true
+          strip_components: 0
