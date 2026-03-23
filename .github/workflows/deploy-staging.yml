@@ -23,10 +23,12 @@ jobs:
             cp -f /tmp/ofo-deploy/functions.php ./functions.php
             cp -f /tmp/ofo-deploy/style.css ./style.css
             cp -f /tmp/ofo-deploy/single-product.php ./single-product.php 2>/dev/null || true
-            cp -rf /tmp/ofo-deploy/includes/ ./includes/
-            cp -rf /tmp/ofo-deploy/custom-css/ ./custom-css/
-            cp -rf /tmp/ofo-deploy/custom-js/ ./custom-js/
-            cp -rf /tmp/ofo-deploy/templates/ ./templates/
-            cp -rf /tmp/ofo-deploy/woocommerce/ ./woocommerce/
+            rm -rf ./includes ./templates ./woocommerce
+            cp -rf /tmp/ofo-deploy/includes ./includes
+            rm -rf ./custom-css ./custom-js
+            cp -rf /tmp/ofo-deploy/custom-css ./custom-css
+            cp -rf /tmp/ofo-deploy/custom-js ./custom-js
+            cp -rf /tmp/ofo-deploy/templates ./templates
+            cp -rf /tmp/ofo-deploy/woocommerce ./woocommerce
             rm -rf /tmp/ofo-deploy
             echo "Deploy complete: $(date)"
