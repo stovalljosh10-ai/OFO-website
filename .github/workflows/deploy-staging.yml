@@ -28,6 +28,10 @@ jobs:
             rm -rf ./custom-css ./custom-js
             cp -rf /tmp/ofo-deploy/custom-css ./custom-css
             cp -rf /tmp/ofo-deploy/custom-js ./custom-js
+            echo "=== Verify pallet-builder.js ==="
+            head -1 ./custom-js/pallet-builder.js
+            grep -c "findProduct" ./custom-js/pallet-builder.js || echo "findProduct NOT found"
+            ls -la ./custom-js/
             cp -rf /tmp/ofo-deploy/templates ./templates
             cp -rf /tmp/ofo-deploy/woocommerce ./woocommerce
             rm -rf /tmp/ofo-deploy
