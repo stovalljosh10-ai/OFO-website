@@ -590,7 +590,8 @@ add_shortcode('ofo_countdown', 'ofo_render_countdown');
 // Auto-inject countdown on the homepage after the content
 add_action('wp_footer', 'ofo_auto_inject_countdown', 5);
 function ofo_auto_inject_countdown() {
-    if (!is_front_page() && !is_home()) return;
+    // Render on all pages — the JS will position it after the slider if present
+    echo ofo_render_countdown(array());
     echo '<script>
     (function(){
         var slider = document.querySelector(".slider-container");
@@ -600,7 +601,6 @@ function ofo_auto_inject_countdown() {
         }
     })();
     </script>';
-    echo ofo_render_countdown(array());
 }
 function ofo_render_countdown($atts) {
     $atts = shortcode_atts(array(
