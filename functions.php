@@ -653,8 +653,8 @@ function ofo_render_countdown($atts) {
           <img src="<?php echo esc_url($eagle_url); ?>" alt="OFO Eagle Mascot" class="ofo-cd-eagle">
         </div>
         <?php endif; ?>
-        <h2 class="ofo-cd-title">MERICA'S BIRTHDAY BASH 🎆</h2>
-        <p class="ofo-cd-subtitle">The biggest fireworks sale of the year — deals drop when the clock hits zero</p>
+        <h2 class="ofo-cd-title">MERICA'S BIRTHDAY BASH</h2>
+        <p class="ofo-cd-subtitle">The biggest fireworks sale of the year is here!</p>
         <div class="ofo-cd-timer" id="ofo-cd-timer">
           <div class="ofo-cd-unit">
             <div class="ofo-cd-flip" id="ofo-cd-days"><span class="ofo-cd-num">00</span></div>
