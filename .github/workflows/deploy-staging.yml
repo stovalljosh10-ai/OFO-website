@@ -11,24 +11,19 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         with:
           host: 64.227.108.149
           username: caruyuloru8018
           password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
           port: 22
+          envs: GH_PAT
           script: |
             THEME="/var/www/html/wp-content/themes/bricks-child"
             cd "$THEME"
             rm -rf /tmp/ofo-deploy
-            git clone --branch dev --depth 1 https://${{ secrets.GH_PAT }}@github.com/stovalljosh10-ai/OFO-website.git /tmp/ofo-deploy
-            echo "=== Clone result: $? ==="
-            echo "=== Files in clone ==="
-            ls /tmp/ofo-deploy/custom-js/
-            echo "=== Check new file ==="
-            grep -c findProduct /tmp/ofo-deploy/custom-js/pallet-builder.js || echo "NOT IN CLONE"
-            echo "=== Current server file ==="
-            grep -c findProduct "$THEME/custom-js/pallet-builder.js" || echo "NOT ON SERVER"
-            echo "=== Copying files ==="
+            git clone --branch dev --depth 1 https://${GH_PAT}@github.com/stovalljosh10-ai/OFO-website.git /tmp/ofo-deploy
             cp -f /tmp/ofo-deploy/functions.php "$THEME/functions.php"
             cp -f /tmp/ofo-deploy/style.css "$THEME/style.css"
             cp -f /tmp/ofo-deploy/single-product.php "$THEME/single-product.php" 2>/dev/null || true
@@ -38,7 +33,5 @@ jobs:
             cp -rf /tmp/ofo-deploy/includes "$THEME/includes"
             cp -rf /tmp/ofo-deploy/templates "$THEME/templates"
             cp -rf /tmp/ofo-deploy/woocommerce "$THEME/woocommerce"
-            echo "=== After copy ==="
-            grep -c findProduct "$THEME/custom-js/pallet-builder.js" && echo "DEPLOY OK" || echo "DEPLOY FAILED"
-            ls -la "$THEME/custom-js/"
             rm -rf /tmp/ofo-deploy
+            echo "Deploy complete: $(date)"
