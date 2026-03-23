@@ -583,8 +583,25 @@ function ofo_render_help_center($atts) {
 
 // ============================================================
 // FEATURE 7: Merica's Birthday Bash Countdown [ofo_countdown]
+// Also auto-renders on the homepage via wp_footer
 // ============================================================
 add_shortcode('ofo_countdown', 'ofo_render_countdown');
+
+// Auto-inject countdown on the homepage after the content
+add_action('wp_footer', 'ofo_auto_inject_countdown', 5);
+function ofo_auto_inject_countdown() {
+    if (!is_front_page() && !is_home()) return;
+    echo '<script>
+    (function(){
+        var slider = document.querySelector(".slider-container");
+        var countdown = document.getElementById("ofo-countdown-section");
+        if (slider && countdown) {
+            slider.parentNode.insertBefore(countdown, slider.nextSibling);
+        }
+    })();
+    </script>';
+    echo ofo_render_countdown(array());
+}
 function ofo_render_countdown($atts) {
     $atts = shortcode_atts(array(
         'target' => '2026-07-04T00:00:00',

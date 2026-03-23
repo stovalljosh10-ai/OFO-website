@@ -199,12 +199,6 @@ function custom_slider_shortcode() {
         })();
     </script>
 
-    <?php
-    if (function_exists('ofo_render_countdown')) {
-        echo ofo_render_countdown(array());
-    }
-    ?>
-
 <?php
     return ob_get_clean();
 }
