@@ -425,6 +425,13 @@ function ofo_ajax_get_pallet_products() {
             if (!$case_pack) $case_pack = 1;
             $shot_count = $product->get_attribute('shot_count');
             if (!$shot_count) $shot_count = get_post_meta(get_the_ID(), '_shot_count', true);
+            if (!$shot_count) {
+                // Auto-extract from description: "25 shots", "100-shot", "16 Shot", etc.
+                $desc = $product->get_description() . ' ' . $product->get_short_description() . ' ' . $product->get_name();
+                if (preg_match('/(\d+)\s*[-\s]?\s*shots?/i', $desc, $m)) {
+                    $shot_count = intval($m[1]);
+                }
+            }
             $retail_price = get_post_meta(get_the_ID(), '_retail_price', true);
             $image_id = $product->get_image_id();
             $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'woocommerce_thumbnail') : '';

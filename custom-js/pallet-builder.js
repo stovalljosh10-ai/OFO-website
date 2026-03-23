@@ -96,7 +96,7 @@ function updateSidebar(){
     var sh=parseInt(p.shot_count)||0;
     ti+=q;
     tp+=q*cs;
-    ts+=q*sh;
+    ts+=q*cs*sh;
     yt+=q*pr;
   }
   var rt=tp*state.COMPETITOR_UNIT_PRICE;
