@@ -9,19 +9,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: dev
-
-      - name: Deploy via SCP to InstaWP Staging
-        uses: appleboy/scp-action@v0.1.7
+      - name: Deploy via SSH to InstaWP Staging
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: 64.227.108.149
           username: caruyuloru8018
           password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
           port: 22
-          source: ".,!.git,!.github,!OFO-Ad-Copy-Toolkit-2025.docx,!OFO-Brand-Positioning-2025.docx,!_PROJECT-PROMPT.md,!README.md,!.DS_Store"
-          target: /var/www/html/wp-content/themes/bricks-child/
-          overwrite: true
-          strip_components: 0
+          script: |
+            cd /var/www/html/wp-content/themes/bricks-child
+            rm -rf /tmp/ofo-deploy
+            git clone --branch dev --depth 1 https://github.com/stovalljosh10-ai/OFO-website.git /tmp/ofo-deploy
+            cp -f /tmp/ofo-deploy/functions.php ./functions.php
+            cp -f /tmp/ofo-deploy/style.css ./style.css
+            cp -f /tmp/ofo-deploy/single-product.php ./single-product.php 2>/dev/null || true
+            cp -rf /tmp/ofo-deploy/includes/ ./includes/
+            cp -rf /tmp/ofo-deploy/custom-css/ ./custom-css/
+            cp -rf /tmp/ofo-deploy/custom-js/ ./custom-js/
+            cp -rf /tmp/ofo-deploy/templates/ ./templates/
+            cp -rf /tmp/ofo-deploy/woocommerce/ ./woocommerce/
+            rm -rf /tmp/ofo-deploy
+            echo "Deploy complete: $(date)"
