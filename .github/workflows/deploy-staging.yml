@@ -12,28 +12,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
+      - name: Upload files via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 64.227.108.149
+          username: caruyuloru8018
+          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+          port: 22
+          script_stop: true
+          script: |
+            echo "Connection OK"
 
-      - name: Deploy files to server
-        env:
-          SSHPASS: ${{ secrets.INSTAWP_SSH_PASSWORD }}
-        run: |
-          REMOTE="caruyuloru8018@64.227.108.149"
-          THEME="/var/www/html/wp-content/themes/bricks-child"
-          OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+      - name: Transfer files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 64.227.108.149
+          username: caruyuloru8018
+          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+          port: 22
+          source: "functions.php,style.css,single-product.php,custom-css/*,custom-js/*,includes/*,templates/*,woocommerce/*"
+          target: /var/www/html/wp-content/themes/bricks-child/
 
-          # Upload root PHP/CSS files
-          sshpass -e scp $OPTS functions.php style.css single-product.php "$REMOTE:$THEME/"
-
-          # Create dirs and upload
-          sshpass -e ssh $OPTS "$REMOTE" "mkdir -p $THEME/custom-css $THEME/custom-js $THEME/includes $THEME/includes/social-automation $THEME/templates $THEME/woocommerce"
-
-          sshpass -e scp $OPTS custom-css/* "$REMOTE:$THEME/custom-css/"
-          sshpass -e scp $OPTS custom-js/* "$REMOTE:$THEME/custom-js/"
-          sshpass -e scp $OPTS includes/*.php "$REMOTE:$THEME/includes/"
-          sshpass -e scp $OPTS templates/* "$REMOTE:$THEME/templates/"
-          sshpass -e scp $OPTS woocommerce/* "$REMOTE:$THEME/woocommerce/"
-
-          # Verify
-          sshpass -e ssh $OPTS "$REMOTE" "grep -c findProduct $THEME/custom-js/pallet-builder.js && echo 'DEPLOY VERIFIED' || echo 'DEPLOY FAILED'"
+      - name: Verify deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 64.227.108.149
+          username: caruyuloru8018
+          password: ${{ secrets.INSTAWP_SSH_PASSWORD }}
+          port: 22
+          script: |
+            grep -c "findProduct" /var/www/html/wp-content/themes/bricks-child/custom-js/pallet-builder.js && echo "DEPLOY OK" || echo "DEPLOY FAILED"
