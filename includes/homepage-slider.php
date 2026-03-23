@@ -198,7 +198,10 @@ function custom_slider_shortcode() {
             
         })();
     </script>
-<?php 
+
+    <?php echo do_shortcode('[ofo_countdown]'); ?>
+
+<?php
     return ob_get_clean();
 }
 add_shortcode('custom_slider', 'custom_slider_shortcode');
