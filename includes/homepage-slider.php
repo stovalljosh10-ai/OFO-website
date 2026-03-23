@@ -199,7 +199,11 @@ function custom_slider_shortcode() {
         })();
     </script>
 
-    <?php echo do_shortcode('[ofo_countdown]'); ?>
+    <?php
+    if (function_exists('ofo_render_countdown')) {
+        echo ofo_render_countdown(array());
+    }
+    ?>
 
 <?php
     return ob_get_clean();
