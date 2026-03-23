@@ -1,0 +1,14 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger InstaWP Deployment
+        run: |
+          curl -X POST "https://app.instawp.io/deployments/site/webhook/ff4d91fa-817b-4573-b8e7-cca2978994ff"
