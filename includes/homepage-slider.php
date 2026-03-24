@@ -160,7 +160,7 @@ function custom_slider_shortcode() {
             }
 
             function startAutoSlide() {
-                autoSlideInterval = setInterval(nextSlide, 3200);
+                autoSlideInterval = setInterval(nextSlide, 6200);
             }
 
             // Event listeners for slider
