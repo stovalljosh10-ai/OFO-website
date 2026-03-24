@@ -37,8 +37,36 @@ add_filter( 'bricks/builder/i18n', function( $i18n ) {
   return $i18n;
 } );
 
-// Product CSV export tool (admin only)
-require_once get_stylesheet_directory() . '/includes/export-products-csv.php';
+// Product CSV export tool (admin only) — visit ?ofo_export_csv=1
+add_action('init', 'ofo_export_products_csv');
+function ofo_export_products_csv() {
+    if (!isset($_GET['ofo_export_csv'])) return;
+    if (!current_user_can('manage_options')) { wp_die('Admin access required.'); }
+    $args = array('post_type' => 'product', 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC');
+    $query = new WP_Query($args);
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename=ofo-products-' . date('Y-m-d') . '.csv');
+    $out = fopen('php://output', 'w');
+    fputcsv($out, array('Product ID', 'Product Name', 'Price', 'Case Pack (current)', 'Case Pack (from description)', 'Shot Count (current)', 'Shot Count (from description)', 'Categories', 'Product URL'));
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $product = wc_get_product(get_the_ID());
+            if (!$product) continue;
+            $desc = $product->get_description() . ' ' . $product->get_short_description() . ' ' . $product->get_name();
+            $cp_cur = $product->get_attribute('case_pack'); if (!$cp_cur) $cp_cur = get_post_meta(get_the_ID(), '_case_pack', true);
+            $cp_desc = ''; if (preg_match('/(\d+)\s*\/\s*1\b/', $desc, $m)) $cp_desc = intval($m[1]);
+            $sc_cur = $product->get_attribute('shot_count'); if (!$sc_cur) $sc_cur = get_post_meta(get_the_ID(), '_shot_count', true);
+            $sc_desc = ''; if (preg_match('/(\d+)\s*[-\s]?\s*shots?/i', $desc, $m)) $sc_desc = intval($m[1]);
+            $terms = get_the_terms(get_the_ID(), 'product_cat'); $cats = '';
+            if ($terms && !is_wp_error($terms)) { $cn = array(); foreach ($terms as $t) { if ($t->slug !== 'uncategorized') $cn[] = $t->name; } $cats = implode(', ', $cn); }
+            fputcsv($out, array($product->get_id(), $product->get_name(), $product->get_price(), $cp_cur ?: '', $cp_desc, $sc_cur ?: '', $sc_desc, $cats, get_permalink(get_the_ID())));
+        }
+        wp_reset_postdata();
+    }
+    fclose($out);
+    exit;
+}
 
 // Only load custom tweaks if ?notest is not present in the URL.
 if (! isset($_GET['notest'])) {
@@ -844,4 +872,177 @@ function ofo_trigger_social_automation($product_id) {
 
     // Store as transient so it can be retrieved if needed
     set_transient('ofo_new_product_' . $product_id, $payload, 24 * HOUR_IN_SECONDS);
+}
+
+// ============================================================
+// ELEVATE 2026 TRADESHOW LANDING PAGE
+// ============================================================
+add_shortcode('ofo_elevate_landing', 'ofo_render_elevate_landing');
+function ofo_render_elevate_landing($atts) {
+    $theme_uri = get_stylesheet_directory_uri();
+    $theme_dir = get_stylesheet_directory();
+    wp_enqueue_style('ofo-elevate-landing', $theme_uri . '/custom-css/elevate-landing.css', array(), ofo_filemtime($theme_dir . '/custom-css/elevate-landing.css'));
+
+    ob_start();
+    ?>
+    <div class="ofo-elevate">
+
+      <!-- HERO -->
+      <div class="ofo-elv-hero">
+        <div class="ofo-elv-hero-inner">
+          <span class="ofo-elv-badge">Elevate Trade Show Exclusive</span>
+          <h1>AMERICA'S <span>250TH BIRTHDAY</span><br>DESERVES THE BIGGEST SHOW</h1>
+          <p class="ofo-elv-hero-sub">Wholesale fireworks at prices your competitors can't touch</p>
+          <p class="ofo-elv-date">Elevate 2026 &middot; April 9&ndash;11, 2026</p>
+        </div>
+      </div>
+
+      <!-- COUPON -->
+      <div class="ofo-elv-coupon">
+        <div class="ofo-elv-coupon-inner">
+          <h2>Your Exclusive Show Discount</h2>
+          <p class="ofo-elv-coupon-desc">All products are already marked 10% off sitewide. Use this code at checkout for an <strong>extra 5% off</strong> &mdash; exclusively for Elevate attendees.</p>
+          <div class="ofo-elv-code-box">
+            <p class="ofo-elv-code-label">Your Promo Code</p>
+            <div class="ofo-elv-code">ELEVATE2026</div>
+          </div>
+          <p class="ofo-elv-code-note">Valid through April 30, 2026 &middot; Stacks on top of current sale prices</p>
+
+          <div class="ofo-elv-savings-badges">
+            <div class="ofo-elv-savings-badge">
+              <strong>10% OFF</strong>
+              <span>Already Applied Sitewide</span>
+            </div>
+            <div class="ofo-elv-savings-badge">
+              <strong>+ 5% OFF</strong>
+              <span>With Code ELEVATE2026</span>
+            </div>
+            <div class="ofo-elv-savings-badge">
+              <strong>Up to 87%</strong>
+              <span>Cheaper Than Retail</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="ofo-elv-products">
+        <div class="ofo-elv-products-inner">
+          <h2>Shop Our Best-Selling Categories</h2>
+          <p class="ofo-elv-products-sub">Wholesale case pricing &mdash; no minimum order required</p>
+
+          <div class="ofo-elv-cat-grid">
+            <a href="/product-category/aerial-fireworks/500g-cakes/" class="ofo-elv-cat-card">
+              <span class="ofo-elv-cat-icon">💥</span>
+              <h3>500g Cakes</h3>
+              <p>The most powerful consumer fireworks. Up to 500 shots of color, sound &amp; aerial effects from a single fuse.</p>
+            </a>
+            <a href="/product-category/aerial-fireworks/200g-cakes/" class="ofo-elv-cat-card">
+              <span class="ofo-elv-cat-icon">🎆</span>
+              <h3>200g Cakes</h3>
+              <p>Multi-shot repeaters with vivid colors and reliable performance. Perfect foundation for any show.</p>
+            </a>
+            <a href="/product-category/aerial-fireworks/artillery/" class="ofo-elv-cat-card">
+              <span class="ofo-elv-cat-icon">🚀</span>
+              <h3>Artillery Shells</h3>
+              <p>The crown jewel of any display. Massive bursts of color that rival professional shows.</p>
+            </a>
+            <a href="/product-category/pallet-packs/" class="ofo-elv-cat-card">
+              <span class="ofo-elv-cat-icon">📦</span>
+              <h3>Pallet Packs</h3>
+              <p>Pre-configured pallets or build your own. Maximum show value at the lowest cost per shot.</p>
+            </a>
+          </div>
+
+          <a href="/shop/" class="ofo-elv-shop-btn">Shop All Fireworks &amp; Save</a>
+        </div>
+      </div>
+
+      <!-- SHIPPING + LOYALTY -->
+      <div class="ofo-elv-info">
+        <div class="ofo-elv-info-inner">
+          <div class="ofo-elv-info-grid">
+            <div class="ofo-elv-info-card">
+              <h3>🚚 Shipping</h3>
+              <ul>
+                <li><strong>$99 flat rate shipping</strong> on all orders</li>
+                <li><strong>FREE shipping</strong> on orders over $1,500</li>
+                <li>Ships via freight carrier direct to your door</li>
+                <li>Most orders ship within 3&ndash;5 business days</li>
+                <li>No minimum order required</li>
+              </ul>
+            </div>
+            <div class="ofo-elv-info-card">
+              <h3>🏆 OFO Loyalty Rewards</h3>
+              <p>Earn points on every purchase and redeem them for discounts on future orders.</p>
+              <ul>
+                <li><strong>1 point per $1 spent</strong></li>
+                <li>Redeem points for store credit</li>
+                <li>Exclusive member-only deals</li>
+                <li>Early access to new products</li>
+                <li><a href="/loyalty-rewards/" style="color:#F5A623;">Join the program &rarr;</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- URGENCY FOOTER -->
+      <div class="ofo-elv-footer">
+        <p>Code <strong>ELEVATE2026</strong> expires April 30, 2026 &mdash; <a href="/shop/">Shop now and save</a></p>
+      </div>
+
+    </div>
+    <?php
+    return ob_get_clean();
+}
+
+// Auto-create Elevate2026 coupon if it doesn't exist
+add_action('init', 'ofo_create_elevate_coupon');
+function ofo_create_elevate_coupon() {
+    if (get_option('ofo_elevate_coupon_created')) return;
+    if (!function_exists('WC')) return;
+
+    $coupon_code = 'Elevate2026';
+    $existing = wc_get_coupon_id_by_code($coupon_code);
+    if ($existing) {
+        update_option('ofo_elevate_coupon_created', true);
+        return;
+    }
+
+    $coupon = new WC_Coupon();
+    $coupon->set_code($coupon_code);
+    $coupon->set_description('Elevate 2026 Tradeshow - Extra 5% off for attendees');
+    $coupon->set_discount_type('percent');
+    $coupon->set_amount(5);
+    $coupon->set_individual_use(false);
+    $coupon->set_date_expires('2026-04-30');
+    $coupon->save();
+
+    update_option('ofo_elevate_coupon_created', true);
+}
+
+// Auto-create Elevate landing page if it doesn't exist
+add_action('init', 'ofo_create_elevate_page');
+function ofo_create_elevate_page() {
+    if (get_option('ofo_elevate_page_created')) return;
+
+    $existing = get_page_by_path('elevate');
+    if ($existing) {
+        update_option('ofo_elevate_page_created', true);
+        return;
+    }
+
+    $page_id = wp_insert_post(array(
+        'post_title'   => 'Elevate 2026',
+        'post_name'    => 'elevate',
+        'post_content' => '[ofo_elevate_landing]',
+        'post_status'  => 'publish',
+        'post_type'    => 'page',
+        'post_author'  => 1,
+    ));
+
+    if ($page_id && !is_wp_error($page_id)) {
+        update_option('ofo_elevate_page_created', $page_id);
+    }
 }
