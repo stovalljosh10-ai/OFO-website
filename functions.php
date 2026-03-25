@@ -883,7 +883,9 @@ function ofo_render_elevate_landing($atts) {
     ?>
     <style>
     .ofo-elevate{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;color:#fff!important;background:#0a0d1a!important;margin:0 -50px!important;padding:0!important;width:calc(100% + 100px)!important;max-width:none!important}
-    .brxe-post-title{display:none!important}
+    .brxe-post-title,.entry-title,.page-title,h1.title{display:none!important}
+    #brx-content>h1,article#brx-content>h1{display:none!important}
+    .brxe-container,.brxe-section,.brxe-block,.entry-content,.page-content,#brx-content,.brxe-post-content{background:#0a0d1a!important;padding:0!important;margin:0!important;max-width:none!important}
     .ofo-elv-hero{position:relative!important;background:linear-gradient(135deg,#003087 0%,#0a1628 40%,#CC1C2E 100%)!important;padding:80px 24px 60px!important;text-align:center!important;overflow:hidden!important}
     .ofo-elv-hero::before{content:''!important;position:absolute!important;inset:0!important;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.08) 0%,transparent 60%)!important;pointer-events:none!important}
     .ofo-elv-hero-inner{position:relative!important;z-index:2!important;max-width:800px!important;margin:0 auto!important}
@@ -930,6 +932,27 @@ function ofo_render_elevate_landing($atts) {
     .ofo-elv-footer a{color:#F5A623!important;text-decoration:underline!important}
     @media(max-width:600px){.ofo-elv-info-grid{grid-template-columns:1fr!important}.ofo-elv-code-box{padding:16px 24px!important}.ofo-elv-savings-badges{flex-direction:column!important;align-items:center!important}.ofo-elevate{margin:0 -20px!important;width:calc(100% + 40px)!important}}
     </style>
+    <script>
+    (function(){
+      var el = document.querySelector('.ofo-elevate');
+      if(!el) return;
+      // Walk up and style all parent containers
+      var p = el.parentElement;
+      while(p && p !== document.body) {
+        p.style.cssText = 'background:#0a0d1a!important;padding:0!important;margin:0!important;max-width:none!important;width:100%!important;';
+        p = p.parentElement;
+      }
+      // Remove the page title completely
+      var titles = document.querySelectorAll('h1, h2, .brxe-heading, .brxe-post-title, [class*="title"]');
+      for(var i=0;i<titles.length;i++){
+        var t = titles[i];
+        if(t.textContent.trim() === 'Elevate 2026' && !t.closest('.ofo-elevate')){
+          t.style.display = 'none';
+          if(t.parentElement && t.parentElement.children.length === 1) t.parentElement.style.display = 'none';
+        }
+      }
+    })();
+    </script>
     <div class="ofo-elevate">
 
       <!-- HERO -->
@@ -939,6 +962,10 @@ function ofo_render_elevate_landing($atts) {
           <h1>AMERICA'S <span>250TH BIRTHDAY</span><br>DESERVES THE BIGGEST SHOW</h1>
           <p class="ofo-elv-hero-sub">Wholesale fireworks at prices your competitors can't touch</p>
           <p class="ofo-elv-date">Elevate 2026 &middot; April 9&ndash;11, 2026</p>
+          <div class="ofo-elv-hero-ctas">
+            <a href="/shop/" class="ofo-elv-shop-btn" style="display:inline-block!important;margin:0 8px!important;">Shop Now &amp; Save</a>
+            <a href="/build-your-custom-pallet/" class="ofo-elv-shop-btn" style="display:inline-block!important;margin:0 8px!important;background:rgba(255,255,255,0.12)!important;border:2px solid rgba(255,255,255,0.6)!important;box-shadow:none!important;">Build Your Pallet</a>
+          </div>
         </div>
       </div>
 
@@ -951,6 +978,7 @@ function ofo_render_elevate_landing($atts) {
             <p class="ofo-elv-code-label">Your Promo Code</p>
             <div class="ofo-elv-code">ELEVATE2026</div>
           </div>
+          <div class="ofo-elv-countdown" id="ofo-elv-countdown" style="margin-top:16px!important;font-size:1rem!important;color:#F5A623!important;font-weight:700!important;"></div>
           <p class="ofo-elv-code-note">Valid through April 30, 2026 &middot; Stacks on top of current sale prices</p>
 
           <div class="ofo-elv-savings-badges">
@@ -978,28 +1006,31 @@ function ofo_render_elevate_landing($atts) {
 
           <div class="ofo-elv-cat-grid">
             <a href="/product-category/aerial-fireworks/500g-cakes/" class="ofo-elv-cat-card">
-              <span class="ofo-elv-cat-icon">💥</span>
+              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#1a1a2e,#CC1C2E)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">💥</div>
               <h3>500g Cakes</h3>
               <p>The most powerful consumer fireworks. Up to 500 shots of color, sound &amp; aerial effects from a single fuse.</p>
             </a>
             <a href="/product-category/aerial-fireworks/200g-cakes/" class="ofo-elv-cat-card">
-              <span class="ofo-elv-cat-icon">🎆</span>
+              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#003087,#1a2744)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">🎆</div>
               <h3>200g Cakes</h3>
               <p>Multi-shot repeaters with vivid colors and reliable performance. Perfect foundation for any show.</p>
             </a>
             <a href="/product-category/aerial-fireworks/artillery/" class="ofo-elv-cat-card">
-              <span class="ofo-elv-cat-icon">🚀</span>
+              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#CC1C2E,#FF4500)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">🚀</div>
               <h3>Artillery Shells</h3>
               <p>The crown jewel of any display. Massive bursts of color that rival professional shows.</p>
             </a>
             <a href="/product-category/pallet-packs/" class="ofo-elv-cat-card">
-              <span class="ofo-elv-cat-icon">📦</span>
+              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#0a1628,#003087)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">📦</div>
               <h3>Pallet Packs</h3>
               <p>Pre-configured pallets or build your own. Maximum show value at the lowest cost per shot.</p>
             </a>
           </div>
 
-          <a href="/shop/" class="ofo-elv-shop-btn">Shop All Fireworks &amp; Save</a>
+          <div style="display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:16px!important;">
+            <a href="/shop/" class="ofo-elv-shop-btn" style="display:inline-block!important;">Shop All Fireworks</a>
+            <a href="/build-your-custom-pallet/" class="ofo-elv-shop-btn" style="display:inline-block!important;background:linear-gradient(135deg,#003087,#1a2744)!important;box-shadow:0 4px 20px rgba(0,48,135,0.5)!important;">Build Your Custom Pallet</a>
+          </div>
         </div>
       </div>
 
@@ -1032,12 +1063,36 @@ function ofo_render_elevate_landing($atts) {
         </div>
       </div>
 
+      <!-- CONTACT CTA -->
+      <div style="background:#0f1420!important;padding:40px 24px!important;text-align:center!important;">
+        <div style="max-width:600px!important;margin:0 auto!important;">
+          <p style="font-size:1.1rem!important;color:rgba(255,255,255,0.8)!important;margin:0 0 12px!important;">Questions about bulk orders or custom pallets?</p>
+          <a href="tel:803-849-0221" style="font-size:clamp(1.5rem,3vw,2rem)!important;font-weight:900!important;color:#F5A623!important;text-decoration:none!important;display:block!important;margin-bottom:8px!important;">803-849-0221</a>
+          <p style="font-size:0.85rem!important;color:rgba(255,255,255,0.5)!important;margin:0!important;">Weekdays 8am &ndash; 4pm EST &middot; <a href="mailto:webmaster@orderfireworksonline.com" style="color:#F5A623!important;">Email us</a></p>
+        </div>
+      </div>
+
       <!-- URGENCY FOOTER -->
       <div class="ofo-elv-footer">
         <p>Code <strong>ELEVATE2026</strong> expires April 30, 2026 &mdash; <a href="/shop/">Shop now and save</a></p>
       </div>
 
     </div>
+    <script>
+    (function(){
+      var target = new Date('2026-04-30T23:59:59').getTime();
+      function updateCountdown(){
+        var now = Date.now();
+        var diff = target - now;
+        if(diff <= 0){document.getElementById('ofo-elv-countdown').textContent='Code has expired';return;}
+        var days = Math.floor(diff/(1000*60*60*24));
+        var hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+        document.getElementById('ofo-elv-countdown').textContent='Code expires in ' + days + ' days, ' + hours + ' hours';
+        setTimeout(updateCountdown, 60000);
+      }
+      updateCountdown();
+    })();
+    </script>
     <?php
     return ob_get_clean();
 }
