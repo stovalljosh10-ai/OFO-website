@@ -37,6 +37,10 @@ add_filter( 'bricks/builder/i18n', function( $i18n ) {
   return $i18n;
 } );
 
+// Product Data Import — visit ?ofo_import_product_data=1 (admin only, run once)
+$import_file = get_stylesheet_directory() . '/includes/import-product-data.php';
+if (file_exists($import_file)) { require_once $import_file; }
+
 // Product CSV export tool (admin only) — visit ?ofo_export_csv=1
 add_action('init', 'ofo_export_products_csv');
 function ofo_export_products_csv() {
