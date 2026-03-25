@@ -1037,22 +1037,22 @@ function ofo_render_elevate_landing($atts) {
 
           <div class="ofo-elv-cat-grid">
             <a href="/product-category/aerial-fireworks/500g-cakes/" class="ofo-elv-cat-card">
-              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#1a1a2e,#CC1C2E)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">💥</div>
+              <div class="ofo-elv-cat-img" style="height:180px!important;border-radius:8px!important;margin-bottom:14px!important;background:#0f1a2c!important;overflow:hidden!important;"><img src="https://ofo-rebuildtest.instawp.site/wp-content/uploads/2025/08/1004316-MILF-Man-I-Love-Fireworks-Front.jpg.webp" alt="500g Cakes" style="width:100%!important;height:100%!important;object-fit:contain!important;"></div>
               <h3>500g Cakes</h3>
               <p>The most powerful consumer fireworks. Up to 500 shots of color, sound &amp; aerial effects from a single fuse.</p>
             </a>
             <a href="/product-category/aerial-fireworks/200g-cakes/" class="ofo-elv-cat-card">
-              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#003087,#1a2744)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">🎆</div>
+              <div class="ofo-elv-cat-img" style="height:180px!important;border-radius:8px!important;margin-bottom:14px!important;background:#0f1a2c!important;overflow:hidden!important;"><img src="https://ofo-rebuildtest.instawp.site/wp-content/uploads/2025/12/unified-fireworks-champion-case-of-24.webp" alt="200g Cakes" style="width:100%!important;height:100%!important;object-fit:contain!important;"></div>
               <h3>200g Cakes</h3>
               <p>Multi-shot repeaters with vivid colors and reliable performance. Perfect foundation for any show.</p>
             </a>
             <a href="/product-category/aerial-fireworks/artillery/" class="ofo-elv-cat-card">
-              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#CC1C2E,#FF4500)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">🚀</div>
+              <div class="ofo-elv-cat-img" style="height:180px!important;border-radius:8px!important;margin-bottom:14px!important;background:#0f1a2c!important;overflow:hidden!important;"><img src="https://orderfireworksonline.com/wp-content/uploads/2025/08/excalibur-firework.png" alt="Artillery Shells" style="width:100%!important;height:100%!important;object-fit:contain!important;"></div>
               <h3>Artillery Shells</h3>
               <p>The crown jewel of any display. Massive bursts of color that rival professional shows.</p>
             </a>
             <a href="/product-category/pallet-packs/" class="ofo-elv-cat-card">
-              <div class="ofo-elv-cat-img" style="height:140px!important;border-radius:8px!important;margin-bottom:14px!important;background:linear-gradient(135deg,#0a1628,#003087)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:3.5rem!important;">📦</div>
+              <div class="ofo-elv-cat-img" style="height:180px!important;border-radius:8px!important;margin-bottom:14px!important;background:#0f1a2c!important;overflow:hidden!important;"><img src="https://orderfireworksonline.com/wp-content/uploads/2026/02/Podium-Of-Freedom.png" alt="Pallet Packs" style="width:100%!important;height:100%!important;object-fit:contain!important;"></div>
               <h3>Pallet Packs</h3>
               <p>Pre-configured pallets or build your own. Maximum show value at the lowest cost per shot.</p>
             </a>
