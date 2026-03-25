@@ -45,11 +45,8 @@
         <div class="opb-pricing">
           <div class="opb-price-row"><span class="opb-price-label">Your Price</span><span class="opb-price-value opb-your-price" id="opb-your-price">$0.00</span></div>
           <div class="opb-price-row">
-            <span class="opb-price-label">Competitor Price (per unit avg $67)</span>
+            <span class="opb-price-label">Original Price</span>
             <span class="opb-price-value opb-retail-price" id="opb-retail-price">$0.00</span>
-          </div>
-          <div class="opb-price-row opb-competitors-note">
-            <span style="font-size:0.72em;color:#888;">vs OC Fireworks, Red Apple, American Wholesale &amp; Superior avg</span>
           </div>
           <div class="opb-savings-row"><span class="opb-savings-label">🎉 You Save</span><span class="opb-savings-amount" id="opb-savings-amount">$0.00</span><span class="opb-savings-pct" id="opb-savings-pct"></span></div>
         </div>

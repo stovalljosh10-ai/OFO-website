@@ -1,5 +1,5 @@
 (function($){'use strict';
-var state={products:[],filtered:[],pallet:{},activeCategory:'all',searchTerm:'',FREE_SHIP_THRESHOLD:1500,COMPETITOR_UNIT_PRICE:67};
+var state={products:[],filtered:[],pallet:{},activeCategory:'all',searchTerm:'',FREE_SHIP_THRESHOLD:1500};
 
 function init(){fetchProducts();bindEvents();}
 
@@ -51,7 +51,7 @@ function renderGrid(){
     var qty=state.pallet[pid]||0;
     var caseSize=parseInt(product.case_pack)||1;
     var price=parseFloat(product.price)||0;
-    var retailPrice=caseSize>1?(caseSize*state.COMPETITOR_UNIT_PRICE):(parseFloat(product.retail_price)||(price*2));
+    var regularPrice=parseFloat(product.regular_price)||price;
     var perUnit=caseSize>1?(price/caseSize).toFixed(2):null;
     var shots=parseInt(product.shot_count)||0;
     var imgHtml=product.image?'<img class="opb-product-img" src="'+esc(product.image)+'" alt="'+esc(product.name)+'" loading="lazy">':'<div class="opb-product-img-placeholder">🎆</div>';
@@ -64,7 +64,7 @@ function renderGrid(){
       +'<div class="opb-product-body">'
       +'<p class="opb-product-name">'+esc(product.name)+'</p>'
       +'<div class="opb-product-meta">'+shotTag+piecesTag+'</div>'
-      +'<div class="opb-product-pricing"><span class="opb-product-price">$'+price.toFixed(2)+'</span><span class="opb-product-retail">$'+retailPrice.toFixed(2)+'</span>'+perUnitHtml+'</div>'
+      +'<div class="opb-product-pricing"><span class="opb-product-price">$'+price.toFixed(2)+'</span>'+(regularPrice>price?'<span class="opb-product-retail">$'+regularPrice.toFixed(2)+'</span>':'')+''+perUnitHtml+'</div>'
       +'<div class="opb-qty-controls">'
       +'<button class="opb-qty-btn opb-qty-minus" data-pid="'+pid+'">−</button>'
       +'<input class="opb-qty-input" type="number" min="0" value="'+qty+'" data-pid="'+pid+'" readonly>'
@@ -85,21 +85,22 @@ function setQty(id,qty){
 
 function updateSidebar(){
   var ids=Object.keys(state.pallet);
-  var ti=0,tp=0,ts=0,yt=0;
+  var ti=0,tp=0,ts=0,yt=0,rt=0;
   for(var i=0;i<ids.length;i++){
     var id=ids[i];
     var p=findProduct(id);
     if(!p)continue;
     var q=state.pallet[id];
     var pr=parseFloat(p.price)||0;
+    var rp=parseFloat(p.regular_price)||pr;
     var cs=parseInt(p.case_pack)||1;
     var sh=parseInt(p.shot_count)||0;
     ti+=q;
     tp+=q*cs;
     ts+=q*cs*sh;
     yt+=q*pr;
+    rt+=q*rp;
   }
-  var rt=tp*state.COMPETITOR_UNIT_PRICE;
   var sv=rt-yt;
   var pct=rt>0?Math.round((sv/rt)*100):0;
 
