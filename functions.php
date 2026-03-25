@@ -879,12 +879,57 @@ function ofo_trigger_social_automation($product_id) {
 // ============================================================
 add_shortcode('ofo_elevate_landing', 'ofo_render_elevate_landing');
 function ofo_render_elevate_landing($atts) {
-    $theme_uri = get_stylesheet_directory_uri();
-    $theme_dir = get_stylesheet_directory();
-    wp_enqueue_style('ofo-elevate-landing', $theme_uri . '/custom-css/elevate-landing.css', array(), ofo_filemtime($theme_dir . '/custom-css/elevate-landing.css'));
-
     ob_start();
     ?>
+    <style>
+    .ofo-elevate{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;color:#fff!important;background:#0a0d1a!important;margin:0 -50px!important;padding:0!important;width:calc(100% + 100px)!important;max-width:none!important}
+    .brxe-post-title{display:none!important}
+    .ofo-elv-hero{position:relative!important;background:linear-gradient(135deg,#003087 0%,#0a1628 40%,#CC1C2E 100%)!important;padding:80px 24px 60px!important;text-align:center!important;overflow:hidden!important}
+    .ofo-elv-hero::before{content:''!important;position:absolute!important;inset:0!important;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.08) 0%,transparent 60%)!important;pointer-events:none!important}
+    .ofo-elv-hero-inner{position:relative!important;z-index:2!important;max-width:800px!important;margin:0 auto!important}
+    .ofo-elv-badge{display:inline-block!important;background:rgba(255,255,255,0.15)!important;border:1px solid rgba(255,255,255,0.3)!important;color:#F5A623!important;font-size:0.85rem!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.1em!important;padding:8px 20px!important;border-radius:50px!important;margin-bottom:24px!important}
+    .ofo-elv-hero h1{font-size:clamp(2rem,5vw,3.5rem)!important;font-weight:900!important;text-transform:uppercase!important;letter-spacing:-0.02em!important;line-height:1.05!important;margin:0 0 16px!important;color:#fff!important;text-shadow:2px 4px 12px rgba(0,0,0,0.4)!important}
+    .ofo-elv-hero h1 span{color:#F5A623!important}
+    .ofo-elv-hero-sub{font-size:clamp(1rem,2vw,1.25rem)!important;color:rgba(255,255,255,0.85)!important;margin:0 0 10px!important;font-weight:500!important}
+    .ofo-elv-date{font-size:1.1rem!important;font-weight:700!important;color:#F5A623!important;margin:0 0 30px!important}
+    .ofo-elv-coupon{background:linear-gradient(135deg,#1a2744 0%,#0f1a2c 100%)!important;padding:60px 24px!important;text-align:center!important}
+    .ofo-elv-coupon-inner{max-width:700px!important;margin:0 auto!important}
+    .ofo-elv-coupon h2{font-size:clamp(1.5rem,3vw,2.2rem)!important;font-weight:800!important;color:#fff!important;margin:0 0 12px!important;text-transform:uppercase!important}
+    .ofo-elv-coupon-desc{font-size:1.05rem!important;color:rgba(255,255,255,0.8)!important;margin:0 0 28px!important;line-height:1.6!important}
+    .ofo-elv-code-box{display:inline-block!important;background:rgba(204,28,46,0.15)!important;border:3px dashed #CC1C2E!important;border-radius:12px!important;padding:24px 48px!important;margin-bottom:16px!important}
+    .ofo-elv-code-label{font-size:0.8rem!important;font-weight:600!important;text-transform:uppercase!important;letter-spacing:0.1em!important;color:rgba(255,255,255,0.6)!important;margin:0 0 8px!important}
+    .ofo-elv-code{font-size:clamp(2rem,5vw,3rem)!important;font-weight:900!important;color:#F5A623!important;letter-spacing:0.08em!important;font-family:'Courier New',monospace!important}
+    .ofo-elv-code-note{font-size:0.85rem!important;color:rgba(255,255,255,0.5)!important;margin-top:12px!important}
+    .ofo-elv-savings-badges{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:16px!important;margin-top:30px!important}
+    .ofo-elv-savings-badge{background:rgba(255,255,255,0.08)!important;border:1px solid rgba(255,255,255,0.15)!important;border-radius:10px!important;padding:16px 24px!important;text-align:center!important;min-width:160px!important}
+    .ofo-elv-savings-badge strong{display:block!important;font-size:1.4rem!important;color:#F5A623!important;margin-bottom:4px!important}
+    .ofo-elv-savings-badge span{font-size:0.8rem!important;color:rgba(255,255,255,0.6)!important}
+    .ofo-elv-products{background:#0f1420!important;padding:60px 24px!important}
+    .ofo-elv-products-inner{max-width:1100px!important;margin:0 auto!important}
+    .ofo-elv-products h2{text-align:center!important;font-size:clamp(1.5rem,3vw,2rem)!important;font-weight:800!important;color:#fff!important;margin:0 0 12px!important;text-transform:uppercase!important}
+    .ofo-elv-products-sub{text-align:center!important;color:rgba(255,255,255,0.6)!important;margin:0 0 36px!important;font-size:1rem!important}
+    .ofo-elv-cat-grid{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))!important;gap:20px!important;margin-bottom:36px!important}
+    .ofo-elv-cat-card{background:linear-gradient(135deg,#1a2744 0%,#152238 100%)!important;border:1px solid rgba(255,255,255,0.1)!important;border-radius:12px!important;padding:30px 24px!important;text-align:center!important;text-decoration:none!important;color:#fff!important;transition:all 0.2s ease!important;display:block!important}
+    .ofo-elv-cat-card:hover{border-color:#F5A623!important;transform:translateY(-4px)!important;box-shadow:0 8px 30px rgba(245,166,35,0.2)!important;color:#fff!important}
+    .ofo-elv-cat-icon{font-size:2.5rem!important;margin-bottom:12px!important;display:block!important}
+    .ofo-elv-cat-card h3{font-size:1.1rem!important;font-weight:700!important;margin:0 0 8px!important;text-transform:uppercase!important;color:#fff!important}
+    .ofo-elv-cat-card p{font-size:0.85rem!important;color:rgba(255,255,255,0.6)!important;margin:0!important;line-height:1.5!important}
+    .ofo-elv-shop-btn{display:block!important;max-width:400px!important;margin:0 auto!important;padding:18px 36px!important;background:linear-gradient(135deg,#CC1C2E 0%,#FF4500 100%)!important;color:#fff!important;font-size:1.1rem!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:0.06em!important;text-align:center!important;text-decoration:none!important;border-radius:50px!important;box-shadow:0 4px 20px rgba(204,28,46,0.5)!important;transition:all 0.2s ease!important}
+    .ofo-elv-shop-btn:hover{transform:translateY(-2px)!important;box-shadow:0 8px 30px rgba(204,28,46,0.65)!important;color:#fff!important}
+    .ofo-elv-info{background:linear-gradient(135deg,#003087 0%,#1a2744 100%)!important;padding:60px 24px!important}
+    .ofo-elv-info-inner{max-width:900px!important;margin:0 auto!important}
+    .ofo-elv-info-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:24px!important}
+    .ofo-elv-info-card{background:rgba(255,255,255,0.06)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:12px!important;padding:30px 24px!important}
+    .ofo-elv-info-card h3{font-size:1.1rem!important;font-weight:700!important;color:#F5A623!important;margin:0 0 12px!important;text-transform:uppercase!important}
+    .ofo-elv-info-card p{font-size:0.9rem!important;color:rgba(255,255,255,0.8)!important;margin:0 0 8px!important;line-height:1.6!important}
+    .ofo-elv-info-card ul{list-style:none!important;padding:0!important;margin:0!important}
+    .ofo-elv-info-card ul li{font-size:0.9rem!important;color:rgba(255,255,255,0.8)!important;padding:6px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important}
+    .ofo-elv-info-card ul li:last-child{border-bottom:none!important}
+    .ofo-elv-footer{background:#CC1C2E!important;padding:30px 24px!important;text-align:center!important}
+    .ofo-elv-footer p{font-size:1.1rem!important;font-weight:700!important;color:#fff!important;margin:0!important}
+    .ofo-elv-footer a{color:#F5A623!important;text-decoration:underline!important}
+    @media(max-width:600px){.ofo-elv-info-grid{grid-template-columns:1fr!important}.ofo-elv-code-box{padding:16px 24px!important}.ofo-elv-savings-badges{flex-direction:column!important;align-items:center!important}.ofo-elevate{margin:0 -20px!important;width:calc(100% + 40px)!important}}
+    </style>
     <div class="ofo-elevate">
 
       <!-- HERO -->
