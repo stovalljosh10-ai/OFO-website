@@ -902,6 +902,16 @@ function ofo_render_elevate_landing($atts) {
     .ofo-elv-code-label{font-size:0.8rem!important;font-weight:600!important;text-transform:uppercase!important;letter-spacing:0.1em!important;color:rgba(255,255,255,0.6)!important;margin:0 0 8px!important}
     .ofo-elv-code{font-size:clamp(2rem,5vw,3rem)!important;font-weight:900!important;color:#F5A623!important;letter-spacing:0.08em!important;font-family:'Courier New',monospace!important}
     .ofo-elv-code-note{font-size:0.85rem!important;color:rgba(255,255,255,0.5)!important;margin-top:12px!important}
+    .ofo-elevate .ofo-cd-timer{display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important}
+    .ofo-elevate .ofo-cd-unit{display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important}
+    .ofo-elevate .ofo-cd-sep{font-size:clamp(1.5rem,3vw,2.2rem)!important;font-weight:800!important;color:#CC1C2E!important;margin-top:-20px!important;animation:ofo-sep-pulse 1s ease-in-out infinite!important}
+    .ofo-elevate .ofo-cd-flip{position:relative!important;width:clamp(60px,12vw,90px)!important;height:clamp(68px,14vw,100px)!important;perspective:400px!important}
+    .ofo-elevate .ofo-cd-num{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:100%!important;font-size:clamp(1.6rem,4vw,2.8rem)!important;font-weight:900!important;font-variant-numeric:tabular-nums!important;color:#fff!important;background:linear-gradient(180deg,#1e3050 0%,#152238 50%,#0f1a2c 50.1%,#0a1220 100%)!important;border-radius:10px!important;box-shadow:0 2px 0 0 rgba(255,255,255,0.08),0 6px 20px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1)!important;border:1px solid rgba(255,255,255,0.08)!important;position:relative!important}
+    .ofo-elevate .ofo-cd-num::after{content:''!important;position:absolute!important;left:0!important;right:0!important;top:50%!important;height:1px!important;background:rgba(0,0,0,0.4)!important}
+    .ofo-elevate .ofo-cd-flip.flip .ofo-cd-num{animation:ofo-flip-tick 0.6s ease-in-out!important}
+    .ofo-elevate .ofo-cd-label{font-size:clamp(0.6rem,1vw,0.75rem)!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:0.12em!important;color:rgba(255,255,255,0.5)!important}
+    @keyframes ofo-sep-pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    @keyframes ofo-flip-tick{0%{transform:rotateX(0)}50%{transform:rotateX(-90deg);opacity:0.6}100%{transform:rotateX(0);opacity:1}}
     .ofo-elv-savings-badges{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:16px!important;margin-top:30px!important}
     .ofo-elv-savings-badge{background:rgba(255,255,255,0.08)!important;border:1px solid rgba(255,255,255,0.15)!important;border-radius:10px!important;padding:16px 24px!important;text-align:center!important;min-width:160px!important}
     .ofo-elv-savings-badge strong{display:block!important;font-size:1.4rem!important;color:#F5A623!important;margin-bottom:4px!important}
@@ -978,7 +988,28 @@ function ofo_render_elevate_landing($atts) {
             <p class="ofo-elv-code-label">Your Promo Code</p>
             <div class="ofo-elv-code">ELEVATE2026</div>
           </div>
-          <div class="ofo-elv-countdown" id="ofo-elv-countdown" style="margin-top:16px!important;font-size:1rem!important;color:#F5A623!important;font-weight:700!important;"></div>
+          <p class="ofo-elv-code-note" style="margin-top:16px!important;margin-bottom:8px!important;">Code expires in:</p>
+          <div class="ofo-cd-timer" id="ofo-elv-timer" style="margin-bottom:16px!important;">
+            <div class="ofo-cd-unit">
+              <div class="ofo-cd-flip" id="ofo-elv-days"><span class="ofo-cd-num">00</span></div>
+              <span class="ofo-cd-label">Days</span>
+            </div>
+            <div class="ofo-cd-sep">:</div>
+            <div class="ofo-cd-unit">
+              <div class="ofo-cd-flip" id="ofo-elv-hours"><span class="ofo-cd-num">00</span></div>
+              <span class="ofo-cd-label">Hours</span>
+            </div>
+            <div class="ofo-cd-sep">:</div>
+            <div class="ofo-cd-unit">
+              <div class="ofo-cd-flip" id="ofo-elv-mins"><span class="ofo-cd-num">00</span></div>
+              <span class="ofo-cd-label">Minutes</span>
+            </div>
+            <div class="ofo-cd-sep">:</div>
+            <div class="ofo-cd-unit">
+              <div class="ofo-cd-flip" id="ofo-elv-secs"><span class="ofo-cd-num">00</span></div>
+              <span class="ofo-cd-label">Seconds</span>
+            </div>
+          </div>
           <p class="ofo-elv-code-note">Valid through April 30, 2026 &middot; Stacks on top of current sale prices</p>
 
           <div class="ofo-elv-savings-badges">
@@ -1081,16 +1112,24 @@ function ofo_render_elevate_landing($atts) {
     <script>
     (function(){
       var target = new Date('2026-04-30T23:59:59').getTime();
-      function updateCountdown(){
-        var now = Date.now();
-        var diff = target - now;
-        if(diff <= 0){document.getElementById('ofo-elv-countdown').textContent='Code has expired';return;}
-        var days = Math.floor(diff/(1000*60*60*24));
-        var hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-        document.getElementById('ofo-elv-countdown').textContent='Code expires in ' + days + ' days, ' + hours + ' hours';
-        setTimeout(updateCountdown, 60000);
+      var prev = {d:'',h:'',m:'',s:''};
+      function pad(n){return n<10?'0'+n:String(n);}
+      function flip(id,val,key){
+        var el=document.getElementById(id);if(!el)return;
+        var num=el.querySelector('.ofo-cd-num');if(!num)return;
+        var str=pad(val);if(str===prev[key])return;
+        prev[key]=str;el.classList.remove('flip');void el.offsetWidth;el.classList.add('flip');num.textContent=str;
       }
-      updateCountdown();
+      function tick(){
+        var diff=target-Date.now();
+        if(diff<=0){document.getElementById('ofo-elv-timer').innerHTML='<span style="font-size:1.5rem;font-weight:900;color:#F5A623;">Code has expired</span>';return;}
+        flip('ofo-elv-days',Math.floor(diff/(1000*60*60*24)),'d');
+        flip('ofo-elv-hours',Math.floor((diff%(1000*60*60*24))/(1000*60*60)),'h');
+        flip('ofo-elv-mins',Math.floor((diff%(1000*60*60))/(1000*60)),'m');
+        flip('ofo-elv-secs',Math.floor((diff%(1000*60))/1000),'s');
+        requestAnimationFrame(function(){setTimeout(tick,1000-(Date.now()%1000));});
+      }
+      tick();
     })();
     </script>
     <?php
